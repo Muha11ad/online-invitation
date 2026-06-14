@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A &amp; B — 14 · 09 · 2025</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wedding-styles.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- ══════════════════ HERO ══════════════════ -->
+  <section class="hero" aria-label="Hero">
+
+    <!-- Monogram — no-photo state -->
+    <div class="hero-monogram" aria-hidden="true">
+      A <span class="amp accent">&amp;</span> B
+    </div>
+
+    <div class="hero-rule" aria-hidden="true"></div>
+
+    <p class="eyebrow hero-eyebrow">Together with their families</p>
+
+    <h1 class="hero-names">
+      Alexandra <span class="amp">&amp;</span> Benjamin
+    </h1>
+
+    <p class="hero-meta">14 September &nbsp;·&nbsp; London</p>
+
+    <div class="scroll-cue" aria-hidden="true"></div>
+
+  </section>
+
+
+  <!-- ══════════════════ MESSAGE ══════════════════ -->
+  <section class="section message-section" aria-label="Message">
+    <div class="container narrow">
+      <p class="message-text reveal">
+        "We are so grateful to share this day with the people who matter most to us. Your presence is the greatest gift we could ever ask for."
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════ DETAILS ══════════════════ -->
+  <section class="section details-section" aria-label="Event details">
+    <div class="container">
+
+      <p class="eyebrow section-eyebrow reveal">The Day</p>
+
+      <div class="details-block">
+
+        <div class="detail-row reveal">
+          <span class="detail-label">When</span>
+          <span class="detail-sep" aria-hidden="true"></span>
+          <div class="detail-info">
+            <span class="detail-primary">Saturday, 14 September 2025</span>
+            <span class="detail-secondary">Ceremony at 3:00 pm &nbsp;·&nbsp; Reception to follow</span>
+          </div>
+        </div>
+
+        <div class="detail-row reveal">
+          <span class="detail-label">Where</span>
+          <span class="detail-sep" aria-hidden="true"></span>
+          <div class="detail-info">
+            <span class="detail-primary">The Grand Hall, Kensington</span>
+            <span class="detail-secondary">25 Exhibition Road, London, SW7 2ER</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Desaturated map embed -->
+      <div class="map-wrap reveal">
+        <iframe
+          src="https://www.openstreetmap.org/export/embed.html?bbox=-0.1850%2C51.4940%2C-0.1650%2C51.5040&amp;layer=mapnik&amp;marker=51.4988%2C-0.1749"
+          title="Venue location map"
+          allowfullscreen
+          loading="lazy">
+        </iframe>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════ SCENE ══════════════════ -->
+  <section class="scene-section" aria-label="Decorative scene">
+    <div class="scene-stage" aria-hidden="true">
+
+      <!-- Interlocked rings -->
+      <div class="rings-wrap">
+        <svg width="200" height="96" viewBox="10 5 150 82" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="ca-right">
+              <rect x="80" y="-200" width="600" height="600"/>
+            </clipPath>
+            <clipPath id="ca-left">
+              <rect x="-600" y="-200" width="680" height="600"/>
+            </clipPath>
+          </defs>
+          <!-- Ring A right half — behind ring B -->
+          <circle cx="80" cy="46" r="35" stroke="var(--sage)" stroke-width="1.5" clip-path="url(#ca-right)"/>
+          <!-- Ring B full -->
+          <circle cx="120" cy="46" r="35" stroke="var(--sage)" stroke-width="1.5"/>
+          <!-- Ring A left half — in front of ring B -->
+          <circle cx="80" cy="46" r="35" stroke="var(--sage)" stroke-width="1.5" clip-path="url(#ca-left)"/>
+        </svg>
+      </div>
+
+      <!-- Birds -->
+      <svg class="bird bird-1" width="38" height="19" viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="bird bird-2" width="24" height="12" viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="bird bird-3" width="46" height="23" viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="bird bird-4" width="30" height="15" viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="bird bird-5" width="18" height="9"  viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="bird bird-6" width="34" height="17" viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="bird bird-7" width="22" height="11" viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="bird bird-8" width="42" height="21" viewBox="0 0 36 18" fill="none"><path d="M0 9 C5 2 11 0 18 9 C25 0 31 2 36 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-monogram" aria-hidden="true">
+      A <span class="amp accent">&amp;</span> B
+    </div>
+
+    <!-- Countdown timer (React) -->
+    <div id="countdown-root" class="reveal"></div>
+
+    <p class="footer-date">14 &nbsp;·&nbsp; 09 &nbsp;·&nbsp; 2025</p>
+  </footer>
+
+
+  <!-- ══════════════════ MUSIC ══════════════════ -->
+  <!-- music_enabled = true in this demo -->
+  <button id="music-btn" class="music-btn" aria-label="Play music" type="button"></button>
+
+  <script src="wedding-music.js"></script>
+  <script src="wedding-script.js"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="countdown-tweaks.jsx"></script>
+<script>
+(async () => {
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  @page { margin: 0.5cm; }\n  html, body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }\n  section, article, figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>
