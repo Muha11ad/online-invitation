@@ -45,25 +45,28 @@ interface CountdownTimerProps {
 }
 
 export function CountdownTimer({ dateDDMMYYYY }: CountdownTimerProps): React.JSX.Element {
-  const [time, setTime] = useState<TimeLeft>(() => getTimeLeft(dateDDMMYYYY));
+  const [time, setTime] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
+    setTime(getTimeLeft(dateDDMMYYYY));
     const id = setInterval(() => setTime(getTimeLeft(dateDDMMYYYY)), 1000);
     return () => clearInterval(id);
   }, [dateDDMMYYYY]);
 
-  const units = [
-    { value: pad(time.days), label: 'Days' },
-    { value: pad(time.hours), label: 'Hours' },
-    { value: pad(time.minutes), label: 'Min' },
-    { value: pad(time.seconds), label: 'Sec' },
-  ];
+  const units = time
+    ? [
+        { value: pad(time.days), label: 'Days' },
+        { value: pad(time.hours), label: 'Hours' },
+        { value: pad(time.minutes), label: 'Min' },
+        { value: pad(time.seconds), label: 'Sec' },
+      ]
+    : [];
 
   return (
     <div className="flex flex-col items-center gap-0 my-[18px]">
       <div className="w-5 h-px bg-sage opacity-50 mx-auto mb-[22px]" aria-hidden="true" />
 
-      {time.invalid ? (
+      {time === null ? null : time.invalid ? (
         <p className="font-sans text-[0.7rem] tracking-[0.1em] text-ink-soft">Invalid date</p>
       ) : time.expired ? (
         <p className="font-display italic text-sage" style={{ fontSize: 'clamp(18px, 2.5vw, 26px)' }}>

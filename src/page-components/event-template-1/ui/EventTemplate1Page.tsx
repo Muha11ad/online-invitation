@@ -1,24 +1,7 @@
+import type { Wedding } from '@/entities/wedding';
 import { CountdownTimer } from './CountdownTimer';
 import { MusicButton } from './MusicButton';
 import { RevealObserver } from './RevealObserver';
-
-const EVENT = {
-  initials: { a: 'A', b: 'B' },
-  names: { a: 'Alexandra', b: 'Benjamin' },
-  dateShort: '14 September',
-  dateFull: 'Saturday, 14 September 2025',
-  dateFormatted: '14 · 09 · 2025',
-  dateDDMMYYYY: '14-09-2025',
-  city: 'London',
-  ceremonyTime: '3:00 pm',
-  venue: 'The Grand Hall, Kensington',
-  address: '25 Exhibition Road, London, SW7 2ER',
-  message:
-    'We are so grateful to share this day with the people who matter most to us. Your presence is the greatest gift we could ever ask for.',
-  mapSrc:
-    'https://www.openstreetmap.org/export/embed.html?bbox=-0.1850%2C51.4940%2C-0.1650%2C51.5040&layer=mapnik&marker=51.4988%2C-0.1749',
-  musicEnabled: true,
-} as const;
 
 const BIRDS = [
   { size: 38, top: '20%', opacity: 0.5,  duration: '16s', delay: '-2s'  },
@@ -31,9 +14,19 @@ const BIRDS = [
   { size: 42, top: '80%', opacity: 0.42, duration: '17s', delay: '-11s' },
 ] as const;
 
-const GALLERY_COUNT = 6;
+const PLACEHOLDER_COUNT = 6;
 
-export function EventTemplate1Page(): React.JSX.Element {
+interface Props {
+  wedding: Wedding;
+}
+
+export function EventTemplate1Page({ wedding }: Props): React.JSX.Element {
+  const initialA = wedding.names.a.charAt(0).toUpperCase();
+  const initialB = wedding.names.b.charAt(0).toUpperCase();
+
+  const galleryItems = wedding.gallery.length > 0 ? wedding.gallery : null;
+  const itemCount = galleryItems ? galleryItems.length : PLACEHOLDER_COUNT;
+
   return (
     <main className="bg-warm-white text-ink font-sans font-light leading-[1.65] antialiased min-h-screen">
       <RevealObserver />
@@ -50,7 +43,7 @@ export function EventTemplate1Page(): React.JSX.Element {
           style={{ fontSize: 'clamp(88px, 20vw, 260px)' }}
           aria-hidden="true"
         >
-          {EVENT.initials.a} <span className="italic text-sage">&amp;</span> {EVENT.initials.b}
+          {initialA} <span className="italic text-sage">&amp;</span> {initialB}
         </div>
 
         {/* Sage rule */}
@@ -74,7 +67,7 @@ export function EventTemplate1Page(): React.JSX.Element {
           className="font-display font-light leading-[1.1] tracking-[-0.01em] mb-[18px]"
           style={{ fontSize: 'clamp(32px, 5.5vw, 72px)' }}
         >
-          {EVENT.names.a} <span className="italic text-sage">&amp;</span> {EVENT.names.b}
+          {wedding.names.a} <span className="italic text-sage">&amp;</span> {wedding.names.b}
         </h1>
 
         {/* Date · City */}
@@ -82,7 +75,7 @@ export function EventTemplate1Page(): React.JSX.Element {
           data-hero="meta"
           className="font-sans text-[0.75rem] font-light tracking-[0.18em] uppercase text-ink-soft"
         >
-          {EVENT.dateShort}&nbsp;·&nbsp;{EVENT.city}
+          {wedding.date.short}&nbsp;·&nbsp;{wedding.location.city}
         </p>
 
         {/* Scroll cue */}
@@ -105,7 +98,7 @@ export function EventTemplate1Page(): React.JSX.Element {
             className="reveal font-display italic font-light leading-[1.7] text-center text-ink"
             style={{ fontSize: 'clamp(20px, 3vw, 30px)' }}
           >
-            &ldquo;{EVENT.message}&rdquo;
+            &ldquo;{wedding.message}&rdquo;
           </p>
         </div>
       </section>
@@ -135,10 +128,10 @@ export function EventTemplate1Page(): React.JSX.Element {
               <span className="w-px bg-hairline self-stretch" aria-hidden="true" />
               <div className="flex flex-col gap-[5px]">
                 <span className="font-display text-[1.2rem] font-normal leading-[1.3]">
-                  {EVENT.dateFull}
+                  {wedding.date.full}
                 </span>
                 <span className="text-[0.75rem] tracking-[0.06em] text-ink-soft">
-                  Ceremony at {EVENT.ceremonyTime}&nbsp;·&nbsp;Reception to follow
+                  Ceremony at {wedding.location.ceremonyTime}&nbsp;·&nbsp;Reception to follow
                 </span>
               </div>
             </div>
@@ -160,26 +153,35 @@ export function EventTemplate1Page(): React.JSX.Element {
               <span className="w-px bg-hairline self-stretch" aria-hidden="true" />
               <div className="flex flex-col gap-[5px]">
                 <span className="font-display text-[1.2rem] font-normal leading-[1.3]">
-                  {EVENT.venue}
+                  {wedding.location.venue}
                 </span>
                 <span className="text-[0.75rem] tracking-[0.06em] text-ink-soft">
-                  {EVENT.address}
+                  {wedding.location.address}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Map */}
-          <div className="reveal aspect-video overflow-hidden bg-hairline">
-            <iframe
-              src={EVENT.mapSrc}
-              title="Venue location map"
-              allowFullScreen
-              loading="lazy"
-              className="w-full h-full border-0 block"
-              style={{ filter: 'grayscale(0.85) contrast(0.88) brightness(1.06)' }}
-            />
-          </div>
+          {wedding.location.coords && (() => {
+            const { lat, lon, zoom } = wedding.location.coords;
+            const z = zoom ?? 16;
+            const src =
+              `https://yandex.com/map-widget/v1/?ll=${lon},${lat}&z=${z}` +
+              `&pt=${lon},${lat},pm2rdm&lang=ru_RU`;
+            return (
+              <div className="reveal aspect-video overflow-hidden bg-hairline">
+                <iframe
+                  src={src}
+                  title="Venue location map"
+                  allowFullScreen
+                  loading="lazy"
+                  className="w-full h-full border-0 block"
+                  style={{ filter: 'grayscale(0.85) contrast(0.88) brightness(1.06)' }}
+                />
+              </div>
+            );
+          })()}
         </div>
       </section>
 
@@ -239,21 +241,35 @@ export function EventTemplate1Page(): React.JSX.Element {
       <section aria-label="Photo gallery" className="px-8 pt-24 pb-[120px]">
         <div className="max-w-[900px] mx-auto">
           <div className="grid grid-cols-3 gap-[14px] items-start max-[600px]:grid-cols-2 max-[600px]:gap-[10px]">
-            {Array.from({ length: GALLERY_COUNT }).map((_, i) => (
-              <div
-                key={i}
-                className="gallery-item reveal aspect-[3/4] overflow-hidden"
-                style={{ '--reveal-delay': `${i * 90}ms` } as React.CSSProperties}
-              >
-                <div
-                  className="w-full h-full transition-transform duration-700 ease-[cubic-bezier(.25,.46,.45,.94)] hover:scale-[1.04]"
-                  style={{
-                    background:
-                      'linear-gradient(155deg, #E8E3D8 0%, #D6D1C6 50%, #C8C3B7 100%)',
-                  }}
-                />
-              </div>
-            ))}
+            {galleryItems
+              ? galleryItems.map((src, i) => (
+                  <div
+                    key={i}
+                    className="gallery-item reveal aspect-[3/4] overflow-hidden"
+                    style={{ '--reveal-delay': `${i * 90}ms` } as React.CSSProperties}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(.25,.46,.45,.94)] hover:scale-[1.04]"
+                    />
+                  </div>
+                ))
+              : Array.from({ length: itemCount }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="gallery-item reveal aspect-[3/4] overflow-hidden"
+                    style={{ '--reveal-delay': `${i * 90}ms` } as React.CSSProperties}
+                  >
+                    <div
+                      className="w-full h-full transition-transform duration-700 ease-[cubic-bezier(.25,.46,.45,.94)] hover:scale-[1.04]"
+                      style={{
+                        background:
+                          'linear-gradient(155deg, #E8E3D8 0%, #D6D1C6 50%, #C8C3B7 100%)',
+                      }}
+                    />
+                  </div>
+                ))}
           </div>
         </div>
       </section>
@@ -265,20 +281,20 @@ export function EventTemplate1Page(): React.JSX.Element {
           style={{ fontSize: 'clamp(24px, 4vw, 44px)' }}
           aria-hidden="true"
         >
-          {EVENT.initials.a} <span className="italic text-sage">&amp;</span> {EVENT.initials.b}
+          {initialA} <span className="italic text-sage">&amp;</span> {initialB}
         </div>
 
         <div className="reveal">
-          <CountdownTimer dateDDMMYYYY={EVENT.dateDDMMYYYY} />
+          <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} />
         </div>
 
         <p className="font-sans text-[0.625rem] font-normal tracking-[0.22em] uppercase text-ink-soft">
-          {EVENT.dateFormatted}
+          {wedding.date.formatted}
         </p>
       </footer>
 
       {/* ══ MUSIC BUTTON ══ */}
-      {EVENT.musicEnabled && <MusicButton />}
+      <MusicButton />
     </main>
   );
 }
