@@ -1,1 +1,1 @@
-export type { Wedding } from './model';
+export type { RawWeddingDoc } from './model';

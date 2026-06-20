@@ -18,9 +18,11 @@ if (process.env.NODE_ENV === 'development') {
     globalThis._mongoClientPromise = client.connect();
   }
   clientPromise = globalThis._mongoClientPromise;
+  console.log('Using existing MongoDB client promise');
 } else {
   client = new MongoClient(uri);
   clientPromise = client.connect();
+  console.log('Creating new MongoDB client promise');
 }
 
 export default clientPromise;
