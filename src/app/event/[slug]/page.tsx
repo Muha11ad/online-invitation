@@ -11,7 +11,7 @@ export default async function EventSlugPage( props: PageProps ) {
   const { slug } = await props.params;
 
   const client = await clientPromise;
-  const db = client.db(process.env.MONGODB_DB!);
+  const db = client.db(process.env.MONGODB_DB_NAME);
   const doc = await db
     .collection<RawWeddingDoc>(process.env.MONGODB_COLLECTION_WEDDINGS!)
     .findOne({ slug });

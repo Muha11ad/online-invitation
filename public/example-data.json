@@ -1,0 +1,28 @@
+{
+	"_id": {
+		"$oid": "6a43e95682f9e49392914ca0"
+	},
+	"slug": "m-and-sh_07-07-2027",
+	"names": {
+		"a": "Aaaa",
+		"b": "Bbbb"
+	},
+	"date": {
+		"short": "7 July",
+		"full": "Tuesday, 7 July 2027",
+		"formatted": "07 · 07 · 2027",
+		"ddmmyyyy": "07-07-2027"
+	},
+	"location": {
+		"city": "Tashkent",
+		"ceremonyTime": "5:00 pm",
+		"venue": "Your Venue Name",
+		"address": "Your Full Address",
+		"coords": {
+			"lat": 41.33074,
+			"lon": 69.221727
+		}
+	},
+	"message": "We are so grateful to share this day with the people who matter most to us. Your presence is the greatest gift we could ever ask for.",
+	"music": "/audio/wedding.mp3"
+}
