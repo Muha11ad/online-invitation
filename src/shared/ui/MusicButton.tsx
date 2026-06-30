@@ -24,9 +24,16 @@ export function MusicButton({ src }: Props): React.JSX.Element {
       // browser blocked autoplay — user must tap the button
     });
 
+    // Allow other components (e.g. EnvelopeGate) to trigger play via a user-gesture-adjacent event
+    function handleAutoplay() {
+      void audio.play().then(() => setPlaying(true)).catch(() => {});
+    }
+    document.addEventListener('wedding:autoplay', handleAutoplay);
+
     return () => {
       audio.pause();
       audioRef.current = null;
+      document.removeEventListener('wedding:autoplay', handleAutoplay);
     };
   }, [src]);
 

@@ -1,9 +1,10 @@
 import type { RawWeddingDoc } from '@/entities/wedding';
 
 import { VenueMap } from '@/shared/ui/VenueMap';
-import { MusicButton } from './MusicButton';
-import { CountdownTimer } from './CountdownTimer';
-import { RevealObserver } from './RevealObserver';
+import { CountdownTimer } from '@/shared/ui/CountdownTimer';
+import { MusicButton } from '@/shared/ui/MusicButton';
+import { RevealObserver } from '@/shared/ui/RevealObserver';
+import { HeroEntranceObserver } from './HeroEntranceObserver';
 
 
 export function WeddingFirstTemplate( wedding: RawWeddingDoc ): React.JSX.Element {
@@ -13,6 +14,7 @@ export function WeddingFirstTemplate( wedding: RawWeddingDoc ): React.JSX.Elemen
   return (
     <main className="bg-warm-white text-ink font-sans font-light leading-[1.65] antialiased min-h-screen">
       <RevealObserver />
+      <HeroEntranceObserver />
 
       {/* ══ HERO ══ */}
       <section

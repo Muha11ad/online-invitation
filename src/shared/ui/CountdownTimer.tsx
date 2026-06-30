@@ -74,7 +74,7 @@ export function CountdownTimer({ dateDDMMYYYY }: CountdownTimerProps): React.JSX
         </p>
       ) : (
         <div
-		  role="timer"
+          role="timer"
           aria-live="off"
           aria-label="Time until the wedding"
           className="flex items-start justify-center gap-[10px]"

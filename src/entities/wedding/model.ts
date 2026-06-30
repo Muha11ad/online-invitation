@@ -25,4 +25,5 @@ export interface RawWeddingDoc {
 	message: string;
 	music?: string;
 	slug: string;
+	template?: 'first' | 'second';
 }
