@@ -149,7 +149,7 @@ export function WeddingSecondTemplate(wedding: RawWeddingDoc): React.JSX.Element
           </div>
 
           <div className="reveal">
-            <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} />
+            <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="light" />
           </div>
 
           <p className="font-sans text-[13px] tracking-[0.05em] mt-[14px]" style={{ color: 'rgba(245,240,225,.72)' }}>

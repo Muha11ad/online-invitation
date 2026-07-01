@@ -42,9 +42,12 @@ function pad(n: number): string {
 
 interface CountdownTimerProps {
   dateDDMMYYYY: string;
+  variant?: 'dark' | 'light';
 }
 
-export function CountdownTimer({ dateDDMMYYYY }: CountdownTimerProps): React.JSX.Element {
+export function CountdownTimer({ dateDDMMYYYY, variant = 'dark' }: CountdownTimerProps): React.JSX.Element {
+  const valueColor = variant === 'light' ? 'text-cream' : 'text-ink';
+  const labelColor = variant === 'light' ? 'text-biscuit' : 'text-ink-soft';
   const [time, setTime] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
@@ -84,11 +87,11 @@ export function CountdownTimer({ dateDDMMYYYY }: CountdownTimerProps): React.JSX
               <div className="flex flex-col items-center gap-[9px]">
                 <span
                   style={{ fontSize: 'clamp(26px, 3vw, 40px)' }}
-                  className="font-display font-light text-ink leading-none tracking-[-0.01em] block text-center min-w-[2ch]"
+                  className={`font-display font-light ${valueColor} leading-none tracking-[-0.01em] block text-center min-w-[2ch]`}
                 >
                   {u.value}
                 </span>
-                <span className="font-sans text-[0.5rem] font-normal tracking-[0.24em] uppercase text-ink-soft">
+                <span className={`font-sans text-[0.5rem] font-normal tracking-[0.24em] uppercase ${labelColor}`}>
                   {u.label}
                 </span>
               </div>

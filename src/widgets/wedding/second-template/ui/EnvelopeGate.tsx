@@ -61,18 +61,19 @@ export function EnvelopeGate({ nameA, nameB }: Props): React.JSX.Element | null 
           transition: 'opacity .75s ease 1.05s',
         }}
       >
-        {/* Envelope wrapper — no filter here: iOS Safari breaks touch hit-testing on children inside filter+preserve-3d parents */}
-        <div
-          style={{
-            position: 'relative',
-            width: 'min(80vw, 560px)',
-            aspectRatio: '7 / 5',
-            transformStyle: 'preserve-3d',
-            transform: isOpening ? 'scale(1.12) translateY(-16px)' : 'scale(1)',
-            opacity: isOpening ? 0 : 1,
-            transition: 'transform .85s cubic-bezier(.22,.61,.36,1) .9s, opacity .85s ease .95s',
-          }}
-        >
+        {/* Envelope wrapper — sized positioning context; the seal button lives outside the preserve-3d child (see below) because
+            iOS Safari breaks touch hit-testing on buttons nested inside a transform-style:preserve-3d ancestor */}
+        <div style={{ position: 'relative', width: 'min(80vw, 560px)', aspectRatio: '7 / 5' }}>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              transformStyle: 'preserve-3d',
+              transform: isOpening ? 'scale(1.12) translateY(-16px)' : 'scale(1)',
+              opacity: isOpening ? 0 : 1,
+              transition: 'transform .85s cubic-bezier(.22,.61,.36,1) .9s, opacity .85s ease .95s',
+            }}
+          >
           {/* Back panel */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 1, borderRadius: '7px', background: 'linear-gradient(150deg,#293620,#1d2615)', boxShadow: '0 34px 60px rgba(38,28,10,.42),0 6px 14px rgba(38,28,10,.3)', overflow: 'hidden', pointerEvents: 'none' }} />
 
@@ -104,8 +105,9 @@ export function EnvelopeGate({ nameA, nameB }: Props): React.JSX.Element | null 
           <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none', borderRadius: '7px', background: 'radial-gradient(120% 120% at 22% 12%,rgba(255,244,222,.30),rgba(255,244,222,.06) 38%,transparent 60%)', mixBlendMode: 'soft-light' }} />
           {/* Vignette */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none', borderRadius: '7px', background: 'radial-gradient(125% 110% at 50% 46%,transparent 52%,rgba(0,0,0,.16) 80%,rgba(0,0,0,.34))' }} />
+        </div>
 
-          {/* Wax seal — the clickable trigger */}
+          {/* Wax seal — the clickable trigger. Sibling of the preserve-3d envelope, not a child of it. */}
           <button
             type="button"
             onClick={open}

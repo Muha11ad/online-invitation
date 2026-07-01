@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	allowedDevOrigins: ['192.168.0.101'],
+	// Wildcard covers the whole private LAN subnet so testing from a phone/other
+	// browser keeps working even after the dev machine's IP changes (DHCP lease, network switch, etc).
+	allowedDevOrigins: ['192.168.*.*'],
 };
 
 export default nextConfig;
