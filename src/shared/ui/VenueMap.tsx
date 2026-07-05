@@ -1,7 +1,24 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import 'leaflet/dist/leaflet.css';
+import {
+  buildYandexGoUrl,
+  buildYandexMapsUrl,
+  buildYandexNavigatorUrl,
+} from '@/shared/lib/mapLinks';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/shared/ui/popover';
+
+type Ymaps3 = typeof import('@yandex/ymaps3-types');
+
+declare global {
+  interface Window {
+    ymaps3?: Ymaps3;
+  }
+}
 
 interface Props {
   lat: number;
@@ -9,42 +26,105 @@ interface Props {
   zoom?: number;
 }
 
+let scriptPromise: Promise<Ymaps3> | null = null;
+
+function loadYandexMapsApi(apiKey: string): Promise<Ymaps3> {
+  scriptPromise ??= new Promise((resolve, reject) => {
+    if (window.ymaps3) {
+      resolve(window.ymaps3);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = `https://api-maps.yandex.ru/v3/?apikey=${apiKey}&lang=en_US`;
+    script.onload = () => resolve(window.ymaps3 as Ymaps3);
+    script.onerror = () => reject(new Error('Failed to load Yandex Maps API'));
+    document.head.appendChild(script);
+  });
+  return scriptPromise;
+}
+
 export function VenueMap({ lat, lon, zoom = 16 }: Props): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
+    if (!container || !apiKey) return;
 
-    let map: import('leaflet').Map;
+    let map: InstanceType<Ymaps3['YMap']> | undefined;
+    let cancelled = false;
 
-    void import('leaflet').then((L) => {
-      map = L.map(container, { zoomControl: false }).setView([lat, lon], zoom);
+    void loadYandexMapsApi(apiKey).then(async (ymaps3) => {
+      await ymaps3.ready;
+      if (cancelled) return;
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-      }).addTo(map);
+      const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker } = ymaps3;
 
-      const icon = L.divIcon({
-        className: '',
-        html: '<div style="width:12px;height:12px;border-radius:50%;background:#8A9A82;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>',
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
+      map = new YMap(container, {
+        location: { center: [lon, lat], zoom },
       });
 
-      L.marker([lat, lon], { icon }).addTo(map);
+      map.addChild(new YMapDefaultSchemeLayer({}));
+      map.addChild(new YMapDefaultFeaturesLayer({}));
+
+      const markerElement = document.createElement('div');
+      markerElement.style.width = '16px';
+      markerElement.style.height = '16px';
+      markerElement.style.borderRadius = '50%';
+      markerElement.style.background = '#8A9A82';
+      markerElement.style.border = '2px solid white';
+      markerElement.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
+
+      map.addChild(new YMapMarker({ coordinates: [lon, lat] }, markerElement));
     });
 
     return () => {
-      map?.remove();
+      cancelled = true;
+      map?.destroy();
     };
   }, [lat, lon, zoom]);
 
+  const mapsUrl = buildYandexMapsUrl(lat, lon, zoom);
+  const goUrl = buildYandexGoUrl(lat, lon);
+  const navigatorUrl = buildYandexNavigatorUrl(lat, lon, zoom);
+
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full"
-      style={{ filter: 'grayscale(0.85) contrast(0.88) brightness(1.06)' }}
-    />
+    <div className="relative w-full h-full">
+      <div ref={containerRef} className="w-full h-full" />
+      <Popover>
+        <PopoverTrigger
+          className="absolute bottom-3 right-3 z-[1000] rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-ink shadow-md backdrop-blur-sm cursor-pointer hover:bg-white"
+          aria-label="Open location in a maps app"
+        >
+          Open in Maps
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-56">
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md px-2.5 py-2 text-sm hover:bg-muted"
+          >
+            Open in Yandex Maps
+          </a>
+          <a
+            href={goUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md px-2.5 py-2 text-sm hover:bg-muted"
+          >
+            Open in Yandex Go
+          </a>
+          <a
+            href={navigatorUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md px-2.5 py-2 text-sm hover:bg-muted"
+          >
+            Open in Yandex Navigator
+          </a>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

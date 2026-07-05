@@ -7,9 +7,11 @@ import { PauseIcon } from '@/shared/ui/PauseIcon';
 
 interface Props {
   src: string;
+  /** Set to false when a gate (e.g. EnvelopeGate) controls playback via the 'wedding:autoplay' event instead. */
+  autoplayOnMount?: boolean;
 }
 
-export function MusicButton({ src }: Props): React.JSX.Element {
+export function MusicButton({ src, autoplayOnMount = true }: Props): React.JSX.Element {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -18,11 +20,13 @@ export function MusicButton({ src }: Props): React.JSX.Element {
     audio.loop = true;
     audioRef.current = audio;
 
-    void audio.play().then(() => {
-      setPlaying(true);
-    }).catch(() => {
-      // browser blocked autoplay — user must tap the button
-    });
+    if (autoplayOnMount) {
+      void audio.play().then(() => {
+        setPlaying(true);
+      }).catch(() => {
+        // browser blocked autoplay — user must tap the button
+      });
+    }
 
     // Allow other components (e.g. EnvelopeGate) to trigger play via a user-gesture-adjacent event
     function handleAutoplay() {
@@ -35,7 +39,7 @@ export function MusicButton({ src }: Props): React.JSX.Element {
       audioRef.current = null;
       document.removeEventListener('wedding:autoplay', handleAutoplay);
     };
-  }, [src]);
+  }, [src, autoplayOnMount]);
 
   function handleClick(): void {
     const audio = audioRef.current;

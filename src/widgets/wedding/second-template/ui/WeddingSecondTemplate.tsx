@@ -158,7 +158,7 @@ export function WeddingSecondTemplate(wedding: RawWeddingDoc): React.JSX.Element
         </div>
       </footer>
 
-      {wedding.music && <MusicButton src={wedding.music} />}
+      {wedding.music && <MusicButton src={wedding.music} autoplayOnMount={false} />}
     </main>
   );
 }

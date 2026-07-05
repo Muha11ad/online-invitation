@@ -38,8 +38,14 @@ export function EnvelopeGate({ nameA, nameB }: Props): React.JSX.Element | null 
       <svg width="0" height="0" style={{ position: 'absolute', overflow: 'hidden' }} aria-hidden="true">
         <defs>
           <filter id="eg-waxEdge">
-            <feTurbulence type="fractalNoise" baseFrequency="0.014 0.016" numOctaves="2" seed="11" result="n" />
-            <feDisplacementMap in="SourceGraphic" in2="n" scale="13" xChannelSelector="R" yChannelSelector="G" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.024" numOctaves="3" seed="11" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="21" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+          <filter id="eg-waxGrain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" seed="7" stitchTiles="stitch" result="noise" />
+            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="grain" />
+            <feComposite in="grain" in2="SourceAlpha" operator="in" result="clippedGrain" />
+            <feBlend in="SourceGraphic" in2="clippedGrain" mode="multiply" />
           </filter>
           <filter id="eg-paperGrain">
             <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="g" />
@@ -75,14 +81,38 @@ export function EnvelopeGate({ nameA, nameB }: Props): React.JSX.Element | null 
             }}
           >
           {/* Back panel */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 1, borderRadius: '7px', background: 'linear-gradient(150deg,#293620,#1d2615)', boxShadow: '0 34px 60px rgba(38,28,10,.42),0 6px 14px rgba(38,28,10,.3)', overflow: 'hidden', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, borderRadius: '7px', background: 'linear-gradient(150deg,#2a3720,#1a2313)', boxShadow: '0 34px 60px rgba(38,28,10,.42),0 6px 14px rgba(38,28,10,.3)', overflow: 'hidden', pointerEvents: 'none' }} />
 
           {/* Left flap */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 2, clipPath: 'polygon(0 0,50% 50%,0 100%)', background: 'linear-gradient(95deg,#3b4b27,#2e3b21)', pointerEvents: 'none' }} />
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 2,
+              clipPath: 'polygon(0 0,50% 50%,0 100%)',
+              background: 'radial-gradient(140% 90% at 0% 50%,rgba(255,241,210,.13),transparent 55%),linear-gradient(96deg,#3a4a26 0%,#313f22 45%,#242e19 100%)',
+              filter: 'drop-shadow(2px 0 2.5px rgba(15,11,4,.4))',
+              pointerEvents: 'none',
+            }}
+          />
           {/* Right flap */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 2, clipPath: 'polygon(100% 0,50% 50%,100% 100%)', background: 'linear-gradient(265deg,#2f3c22,#252f1a)', pointerEvents: 'none' }} />
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 2,
+              clipPath: 'polygon(100% 0,50% 50%,100% 100%)',
+              background: 'radial-gradient(140% 90% at 100% 50%,rgba(255,241,210,.1),transparent 55%),linear-gradient(264deg,#2e3b21 0%,#28331c 45%,#202918 100%)',
+              filter: 'drop-shadow(-2px 0 2.5px rgba(15,11,4,.4))',
+              pointerEvents: 'none',
+            }}
+          />
           {/* Bottom flap */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 3, clipPath: 'polygon(0 100%,100% 100%,50% 50%)', background: 'linear-gradient(180deg,#2c3820,#222d18)', pointerEvents: 'none' }} />
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 3,
+              clipPath: 'polygon(0 100%,100% 100%,50% 50%)',
+              background: 'radial-gradient(120% 80% at 50% 100%,rgba(255,241,210,.08),transparent 55%),linear-gradient(180deg,#2b3820 0%,#232e19 55%,#1c2414 100%)',
+              filter: 'drop-shadow(0 -2px 3px rgba(15,11,4,.42))',
+              pointerEvents: 'none',
+            }}
+          />
 
           {/* Top flap — opens on click */}
           <div
@@ -92,10 +122,11 @@ export function EnvelopeGate({ nameA, nameB }: Props): React.JSX.Element | null 
               transform: isOpening ? 'rotateX(178deg)' : 'rotateX(0deg)',
               transition: 'transform .8s cubic-bezier(.45,0,.25,1) .3s',
               clipPath: 'polygon(0 0, 100% 0, 50% 50%)',
-              background: 'linear-gradient(168deg,#44552d 0%,#384726 55%,#2d3a21 100%)',
+              background: 'radial-gradient(120% 140% at 50% 0%,rgba(255,244,218,.16),transparent 46%),linear-gradient(168deg,#46572f 0%,#394827 46%,#2c3920 78%,#232d19 100%)',
               backfaceVisibility: 'visible',
               willChange: 'transform',
               pointerEvents: 'none',
+              filter: 'drop-shadow(0 3px 5px rgba(12,9,3,.48))',
             }}
           />
 
@@ -122,14 +153,21 @@ export function EnvelopeGate({ nameA, nameB }: Props): React.JSX.Element | null 
             }}
           >
             {/* Wax clump with drips */}
-            <div style={{ position: 'absolute', inset: 0, filter: 'url(#eg-waxEdge) drop-shadow(3px 5px 5px rgba(35,12,4,.5))' }}>
-              <div style={{ position: 'absolute', width: '22px', height: '26px', left: '58%', bottom: '-9px', borderRadius: '50%', background: 'radial-gradient(circle at 40% 30%,#8f3329,#601a12)' }} />
-              <div style={{ position: 'absolute', width: '18px', height: '16px', right: '-6px', top: '56%', borderRadius: '50%', background: 'radial-gradient(circle at 40% 30%,#8a3026,#5b1810)' }} />
-              <div style={{ position: 'absolute', width: '14px', height: '14px', left: '-5px', top: '42%', borderRadius: '50%', background: 'radial-gradient(circle at 40% 30%,#883026,#581710)' }} />
-              {/* Wax disc */}
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(120% 120% at 36% 28%,#a8453a 0%,#8c3227 46%,#74251c 72%,#5a160c 100%)', boxShadow: 'inset 5px 6px 11px rgba(255,206,182,.26),inset -7px -9px 16px rgba(42,9,4,.5),inset 0 0 0 1px rgba(58,13,7,.45)' }} />
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', boxShadow: 'inset 0 0 9px 3px rgba(46,10,5,.4)' }} />
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(60% 50% at 33% 26%,rgba(255,236,216,.38),rgba(255,236,216,.07) 48%,transparent 72%)' }} />
+            <div style={{ position: 'absolute', inset: 0, filter: 'url(#eg-waxEdge) drop-shadow(2px 4px 4px rgba(30,10,4,.55))' }}>
+              {/* Drips — elongated, dripping from the lower edge of the disc */}
+              <div style={{ position: 'absolute', width: '15px', height: '30px', left: '30%', bottom: '-16px', borderRadius: '48% 52% 42% 58% / 30% 30% 70% 70%', background: 'linear-gradient(180deg,#6e2015,#4a140b)' }} />
+              <div style={{ position: 'absolute', width: '11px', height: '19px', right: '18%', bottom: '-10px', borderRadius: '52% 48% 46% 54% / 32% 32% 68% 68%', background: 'linear-gradient(180deg,#681e13,#46130a)' }} />
+              {/* Wax disc — organic blob, not a perfect circle */}
+              <div
+                style={{
+                  position: 'absolute', inset: 0,
+                  borderRadius: '46% 54% 51% 49% / 53% 46% 54% 47%',
+                  background: 'radial-gradient(115% 115% at 34% 26%,#823227 0%,#6c2419 42%,#571a10 68%,#3f1108 100%)',
+                  boxShadow: 'inset 4px 5px 9px rgba(255,206,182,.14),inset -6px -8px 14px rgba(30,6,3,.55),inset 0 0 0 1px rgba(46,10,5,.5)',
+                  filter: 'url(#eg-waxGrain)',
+                }}
+              />
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '46% 54% 51% 49% / 53% 46% 54% 47%', background: 'radial-gradient(46% 38% at 32% 24%,rgba(255,226,204,.22),transparent 68%)' }} />
             </div>
             {/* Embossed monogram */}
             <span
