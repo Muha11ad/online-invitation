@@ -1,9 +1,9 @@
-'use client';
-import { useEffect } from 'react';
+"use client";
+import { useEffect } from "react";
 
 export function HeroEntranceObserver(): null {
   useEffect(() => {
-    const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const noMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (noMotion) return;
     const heroEls: (Element | null)[] = [
       document.querySelector('[data-hero="monogram"]'),
@@ -12,11 +12,11 @@ export function HeroEntranceObserver(): null {
       document.querySelector('[data-hero="meta"]'),
       document.querySelector('[data-hero="scroll-cue"]'),
     ];
-    heroEls.forEach((el) => el?.classList.add('hero-enter'));
+    heroEls.forEach((el) => el?.classList.add("hero-enter"));
     const delays = [80, 400, 650, 820, 1100];
     heroEls.forEach((el, i) => {
       if (!el) return;
-      setTimeout(() => el.classList.add('visible'), delays[i]);
+      setTimeout(() => el.classList.add("visible"), delays[i]);
     });
   }, []);
   return null;

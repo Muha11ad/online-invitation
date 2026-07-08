@@ -1,13 +1,12 @@
-import { notFound } from 'next/navigation';
+import { notFound } from "next/navigation";
 
-import type { RawWeddingDoc } from '@/entities/wedding';
-import { WeddingFirstTemplate } from '@/widgets/wedding/first-template';
-import { WeddingSecondTemplate } from '@/widgets/wedding/second-template';
-import clientPromise from '@/shared/lib/mongodb';
+import type { RawWeddingDoc } from "@/entities/wedding";
+import { WeddingFirstTemplate } from "@/widgets/wedding/first-template";
+import { WeddingSecondTemplate } from "@/widgets/wedding/second-template";
+import clientPromise from "@/shared/lib/mongodb";
 
-
-export default async function EventSlugPage(props: PageProps) {
-  const { slug } = await props.params;
+export default async function EventSlugPage({ params }: PageProps) {
+  const { slug } = await params;
 
   const client = await clientPromise;
   const db = client.db(process.env.MONGODB_DB_NAME);
@@ -19,7 +18,7 @@ export default async function EventSlugPage(props: PageProps) {
     notFound();
   }
 
-  if (doc.template === 'second') {
+  if (doc.template === "second") {
     return <WeddingSecondTemplate {...doc} />;
   }
   return <WeddingFirstTemplate {...doc} />;

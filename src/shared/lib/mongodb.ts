@@ -1,8 +1,8 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
 if (!uri) {
-  throw new Error('MONGODB_URI environment variable is not set');
+  throw new Error("MONGODB_URI environment variable is not set");
 }
 
 declare global {
@@ -12,17 +12,17 @@ declare global {
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   if (!globalThis._mongoClientPromise) {
     client = new MongoClient(uri);
     globalThis._mongoClientPromise = client.connect();
   }
   clientPromise = globalThis._mongoClientPromise;
-  console.log('Using existing MongoDB client promise');
+  console.log("Using existing MongoDB client promise");
 } else {
   client = new MongoClient(uri);
   clientPromise = client.connect();
-  console.log('Creating new MongoDB client promise');
+  console.log("Creating new MongoDB client promise");
 }
 
 export default clientPromise;

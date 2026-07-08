@@ -1,1 +1,1 @@
-export type { RawWeddingDoc } from './model';
+export type { RawWeddingDoc } from "./model";

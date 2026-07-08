@@ -1,1 +1,1 @@
-export { WeddingSecondTemplate } from './ui/WeddingSecondTemplate';
+export { WeddingSecondTemplate } from "./ui/WeddingSecondTemplate";

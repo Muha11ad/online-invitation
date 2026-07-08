@@ -1,99 +1,47 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from "react";
+import React from "react";
+import ReactDOM from "react-dom";
 import {
   buildYandexGoUrl,
   buildYandexMapsUrl,
   buildYandexNavigatorUrl,
-} from '@/shared/lib/mapLinks';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/shared/ui/popover';
+} from "@/shared/lib/mapLinks";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 
-type Ymaps3 = typeof import('@yandex/ymaps3-types');
-
-declare global {
-  interface Window {
-    ymaps3?: Ymaps3;
-  }
-}
-
-interface Props {
-  lat: number;
-  lon: number;
-  zoom?: number;
-}
-
-let scriptPromise: Promise<Ymaps3> | null = null;
-
-function loadYandexMapsApi(apiKey: string): Promise<Ymaps3> {
-  scriptPromise ??= new Promise((resolve, reject) => {
-    if (window.ymaps3) {
-      resolve(window.ymaps3);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = `https://api-maps.yandex.ru/v3/?apikey=${apiKey}&lang=en_US`;
-    script.onload = () => resolve(window.ymaps3 as Ymaps3);
-    script.onerror = () => reject(new Error('Failed to load Yandex Maps API'));
-    document.head.appendChild(script);
-  });
-  return scriptPromise;
-}
-
-export function VenueMap({ lat, lon, zoom = 16 }: Props): React.JSX.Element {
-  const containerRef = useRef<HTMLDivElement>(null);
+export function VenueMap(params: VenueMapParams): React.JSX.Element {
+  const zoom = params.zoom ?? 16;
+  const [components, setComponents] = useState<ReactifiedComponents | null>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
     const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
-    if (!container || !apiKey) return;
+    if (!apiKey) return;
 
-    let map: InstanceType<Ymaps3['YMap']> | undefined;
     let cancelled = false;
-
-    void loadYandexMapsApi(apiKey).then(async (ymaps3) => {
-      await ymaps3.ready;
-      if (cancelled) return;
-
-      const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker } = ymaps3;
-
-      map = new YMap(container, {
-        location: { center: [lon, lat], zoom },
+    void loadYandexMapsApi(apiKey)
+      .then((ymaps3) => getReactifiedYmaps3(ymaps3))
+      .then((loaded) => {
+        if (!cancelled) setComponents(loaded);
       });
-
-      map.addChild(new YMapDefaultSchemeLayer({}));
-      map.addChild(new YMapDefaultFeaturesLayer({}));
-
-      const markerElement = document.createElement('div');
-      markerElement.style.width = '16px';
-      markerElement.style.height = '16px';
-      markerElement.style.borderRadius = '50%';
-      markerElement.style.background = '#8A9A82';
-      markerElement.style.border = '2px solid white';
-      markerElement.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
-
-      map.addChild(new YMapMarker({ coordinates: [lon, lat] }, markerElement));
-    });
 
     return () => {
       cancelled = true;
-      map?.destroy();
     };
-  }, [lat, lon, zoom]);
+  }, []);
 
-  const mapsUrl = buildYandexMapsUrl(lat, lon, zoom);
-  const goUrl = buildYandexGoUrl(lat, lon);
-  const navigatorUrl = buildYandexNavigatorUrl(lat, lon, zoom);
+  const mapsUrl = buildYandexMapsUrl(params.lat, params.lon, zoom);
+  const goUrl = buildYandexGoUrl(params.lat, params.lon);
+  const navigatorUrl = buildYandexNavigatorUrl(params.lat, params.lon, zoom);
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={containerRef} className="w-full h-full" />
+    <div className="relative h-full w-full">
+      {components && (
+        <YandexMapView lat={params.lat} lon={params.lon} zoom={zoom} components={components} />
+      )}
       <Popover>
         <PopoverTrigger
-          className="absolute bottom-3 right-3 z-[1000] rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-ink shadow-md backdrop-blur-sm cursor-pointer hover:bg-white"
+          className="absolute right-3 bottom-3 z-[1000] cursor-pointer rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-ink shadow-md backdrop-blur-sm hover:bg-white"
           aria-label="Open location in a maps app"
         >
           Open in Maps
@@ -126,5 +74,84 @@ export function VenueMap({ lat, lon, zoom = 16 }: Props): React.JSX.Element {
         </PopoverContent>
       </Popover>
     </div>
+  );
+}
+
+type Ymaps3 = typeof import("@yandex/ymaps3-types");
+
+declare global {
+  interface Window {
+    ymaps3?: Ymaps3;
+  }
+}
+
+interface VenueMapParams {
+  lat: number;
+  lon: number;
+  zoom?: number;
+}
+
+let scriptPromise: Promise<Ymaps3> | null = null;
+
+function loadYandexMapsApi(apiKey: string): Promise<Ymaps3> {
+  scriptPromise ??= new Promise((resolve, reject) => {
+    if (window.ymaps3) {
+      resolve(window.ymaps3);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `https://api-maps.yandex.ru/v3/?apikey=${apiKey}&lang=en_US`;
+    script.onload = () => resolve(window.ymaps3 as Ymaps3);
+    script.onerror = () => reject(new Error("Failed to load Yandex Maps API"));
+    document.head.appendChild(script);
+  });
+  return scriptPromise;
+}
+
+async function loadReactifiedYmaps3(ymaps3: Ymaps3) {
+  await ymaps3.ready;
+  const ymaps3React = await ymaps3.import("@yandex/ymaps3-reactify");
+  const reactify = ymaps3React.reactify.bindTo(React, ReactDOM);
+  const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker } =
+    reactify.module(ymaps3);
+  return { reactify, YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker };
+}
+
+type ReactifiedComponents = Awaited<ReturnType<typeof loadReactifiedYmaps3>>;
+
+let reactifyPromise: ReturnType<typeof loadReactifiedYmaps3> | null = null;
+
+function getReactifiedYmaps3(ymaps3: Ymaps3): ReturnType<typeof loadReactifiedYmaps3> {
+  reactifyPromise ??= loadReactifiedYmaps3(ymaps3);
+  return reactifyPromise;
+}
+
+interface YandexMapViewParams {
+  lat: number;
+  lon: number;
+  zoom: number;
+  components: ReactifiedComponents;
+}
+
+function YandexMapView(params: YandexMapViewParams): React.JSX.Element {
+  const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, reactify } =
+    params.components;
+  const location = reactify.useDefault(
+    { center: [params.lon, params.lat] as [number, number], zoom: params.zoom },
+    [params.lat, params.lon, params.zoom],
+  );
+  const coordinates = reactify.useDefault([params.lon, params.lat] as [number, number], [
+    params.lat,
+    params.lon,
+  ]);
+
+  return (
+    <YMap location={location} className="h-full w-full">
+      <YMapDefaultSchemeLayer />
+      <YMapDefaultFeaturesLayer />
+      <YMapMarker coordinates={coordinates}>
+        <div className="h-4 w-4 rounded-full border-2 border-white bg-[#8A9A82] shadow-[0_1px_4px_rgba(0,0,0,.35)]" />
+      </YMapMarker>
+    </YMap>
   );
 }
