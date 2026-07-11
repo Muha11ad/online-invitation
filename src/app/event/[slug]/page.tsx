@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 
 import type { RawWeddingDoc } from "@/entities/wedding";
+
+import clientPromise from "@/shared/lib/mongodb";
+import { TemplateType } from "@/shared/types/templates";
+
 import { WeddingFirstTemplate } from "@/widgets/wedding/first-template";
 import { WeddingSecondTemplate } from "@/widgets/wedding/second-template";
-import clientPromise from "@/shared/lib/mongodb";
 
 export default async function EventSlugPage({ params }: PageProps) {
   const { slug } = await params;
@@ -18,10 +21,17 @@ export default async function EventSlugPage({ params }: PageProps) {
     notFound();
   }
 
-  if (doc.template === "second") {
-    return <WeddingSecondTemplate {...doc} />;
+  switch (doc.template) {
+    case TemplateType.FIRST: {
+      return <WeddingFirstTemplate {...doc} />;
+    }
+    case TemplateType.SECOND: {
+      return <WeddingSecondTemplate {...doc} />;
+    }
+    default: {
+      notFound();
+    }
   }
-  return <WeddingFirstTemplate {...doc} />;
 }
 
 interface PageProps {

@@ -1,6 +1,6 @@
 import type { RawWeddingDoc } from "@/entities/wedding";
 import { VenueMap } from "@/shared/ui/VenueMap";
-import { MusicButton } from "@/shared/ui/MusicButton";
+import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
 import { EnvelopeGate } from "./EnvelopeGate";

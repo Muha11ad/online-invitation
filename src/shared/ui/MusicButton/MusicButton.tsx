@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { NoteIcon } from "@/shared/ui/NoteIcon";
-import { PauseIcon } from "@/shared/ui/PauseIcon";
+import { NoteIcon } from "@/shared/ui/MusicButton/NoteIcon";
+import { PauseIcon } from "@/shared/ui/MusicButton/PauseIcon";
 
 export function MusicButton(params: MusicButtonParams): React.JSX.Element {
   const { src, autoplayOnMount = true } = params;
@@ -16,22 +16,12 @@ export function MusicButton(params: MusicButtonParams): React.JSX.Element {
     audioRef.current = audio;
 
     if (autoplayOnMount) {
-      void audio
-        .play()
-        .then(() => {
-          setPlaying(true);
-        })
-        .catch(() => {
-          // browser blocked autoplay — user must tap the button
-        });
+      playAudio(audio, () => setPlaying(true));
     }
 
     // Allow other components (e.g. EnvelopeGate) to trigger play via a user-gesture-adjacent event
     function handleAutoplay() {
-      void audio
-        .play()
-        .then(() => setPlaying(true))
-        .catch(() => {});
+      playAudio(audio, () => setPlaying(true));
     }
     document.addEventListener("wedding:autoplay", handleAutoplay);
 
@@ -44,7 +34,10 @@ export function MusicButton(params: MusicButtonParams): React.JSX.Element {
 
   function handleClick(): void {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio) {
+      return;
+    }
+
     if (playing) {
       audio.pause();
     } else {
@@ -58,18 +51,41 @@ export function MusicButton(params: MusicButtonParams): React.JSX.Element {
       type="button"
       onClick={handleClick}
       aria-label={playing ? "Mute music" : "Play music"}
-      className={[
-        "fixed right-7 bottom-7 z-[200]",
-        "h-11 w-11 cursor-pointer rounded-full border outline-none",
-        "flex items-center justify-center",
-        "transition-colors duration-[240ms] ease-[ease]",
-        playing
-          ? "border-sage bg-sage text-warm-white"
-          : "border-sage bg-warm-white text-sage hover:bg-sage hover:text-warm-white",
-        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-sage",
-      ].join(" ")}
+      className={getButtonClassName(playing)}
       style={{ position: "fixed" }}
     >
+      {getButtonContent(playing)}
+    </button>
+  );
+}
+
+function playAudio(audio: HTMLAudioElement, onPlaying: () => void): void {
+  void audio
+    .play()
+    .then(() => {
+      onPlaying();
+    })
+    .catch(() => {
+      // browser blocked autoplay — user must tap the button
+    });
+}
+
+function getButtonClassName(playing: boolean): string {
+  return [
+    "fixed right-7 bottom-7 z-[200]",
+    "h-11 w-11 cursor-pointer rounded-full border outline-none",
+    "flex items-center justify-center",
+    "transition-colors duration-[240ms] ease-[ease]",
+    playing
+      ? "border-sage bg-sage text-warm-white"
+      : "border-sage bg-warm-white text-sage hover:bg-sage hover:text-warm-white",
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-sage",
+  ].join(" ");
+}
+
+function getButtonContent(playing: boolean): React.ReactNode {
+  return (
+    <>
       {playing && (
         <span
           className="pointer-events-none absolute inset-[-5px] rounded-full border border-sage"
@@ -78,7 +94,7 @@ export function MusicButton(params: MusicButtonParams): React.JSX.Element {
         />
       )}
       {playing ? <PauseIcon /> : <NoteIcon />}
-    </button>
+    </>
   );
 }
 

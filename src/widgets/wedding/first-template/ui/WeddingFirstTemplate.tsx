@@ -2,7 +2,7 @@ import type { RawWeddingDoc } from "@/entities/wedding";
 
 import { VenueMap } from "@/shared/ui/VenueMap";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
-import { MusicButton } from "@/shared/ui/MusicButton";
+import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
 import { HeroEntranceObserver } from "./HeroEntranceObserver";
 
@@ -220,7 +220,7 @@ export function WeddingFirstTemplate(wedding: RawWeddingDoc): React.JSX.Element 
         </div>
 
         <div className="reveal">
-          <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} />
+          <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="dark" />
         </div>
 
         <p className="font-sans text-[0.625rem] font-normal tracking-[0.22em] text-ink-soft uppercase">

@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import React from "react";
 import ReactDOM from "react-dom";
+import { useEffect, useState } from "react";
+
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import {
   buildYandexGoUrl,
   buildYandexMapsUrl,
   buildYandexNavigatorUrl,
 } from "@/shared/lib/mapLinks";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 
 export function VenueMap(params: VenueMapParams): React.JSX.Element {
   const zoom = params.zoom ?? 16;
