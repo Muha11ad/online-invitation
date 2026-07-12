@@ -1,9 +1,10 @@
 import type { RawWeddingDoc } from "@/entities/wedding";
 
-import { VenueMap } from "@/shared/ui/VenueMap";
+import { Map } from "@/shared/ui/Map/Map";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
 import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
+
 import { HeroEntranceObserver } from "./HeroEntranceObserver";
 
 export function WeddingFirstTemplate(wedding: RawWeddingDoc): React.JSX.Element {
@@ -137,7 +138,19 @@ export function WeddingFirstTemplate(wedding: RawWeddingDoc): React.JSX.Element 
           {/* Map */}
           {wedding.location.coords && (
             <div className="reveal aspect-video overflow-hidden bg-hairline">
-              <VenueMap lat={wedding.location.coords.lat} lon={wedding.location.coords.lon} />
+              <Map
+                lat={wedding.location.coords.lat}
+                lon={wedding.location.coords.lon}
+                palette={{
+                  land: "#f5f0e1",
+                  water: "#8a9a82",
+                  road: "#fbfaf7",
+                  roadCasing: "#e7e3db",
+                  label: "#2b2a28",
+                  labelHalo: "#fbfaf7",
+                  pin: "#8a9a82",
+                }}
+              />
             </div>
           )}
         </div>

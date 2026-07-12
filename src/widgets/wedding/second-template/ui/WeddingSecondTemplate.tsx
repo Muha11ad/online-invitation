@@ -1,8 +1,10 @@
 import type { RawWeddingDoc } from "@/entities/wedding";
-import { VenueMap } from "@/shared/ui/VenueMap";
-import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
+
+import { Map } from "@/shared/ui/Map/Map";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
+import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
+
 import { EnvelopeGate } from "./EnvelopeGate";
 
 export function WeddingSecondTemplate(wedding: RawWeddingDoc): React.JSX.Element {
@@ -314,7 +316,19 @@ export function WeddingSecondTemplate(wedding: RawWeddingDoc): React.JSX.Element
             {/* Map */}
             {wedding.location.coords && (
               <div className="mt-[30px] h-[230px] overflow-hidden rounded-[5px]">
-                <VenueMap lat={wedding.location.coords.lat} lon={wedding.location.coords.lon} />
+                <Map
+                  lat={wedding.location.coords.lat}
+                  lon={wedding.location.coords.lon}
+                  palette={{
+                    land: "#efd3bc",
+                    water: "#2d3a23",
+                    road: "#f5f0e1",
+                    roadCasing: "#e9ddc4",
+                    label: "#2d3a23",
+                    labelHalo: "#f5f0e1",
+                    pin: "#c8612e",
+                  }}
+                />
               </div>
             )}
           </div>
