@@ -24,6 +24,8 @@ export interface RawWeddingDoc {
   };
   message: string;
   music?: string;
+  guests?: string[];
+  coupleMainImage?: string;
   slug: string;
-  template: "first" | "second";
+  template: "first" | "second" | "third";
 }
