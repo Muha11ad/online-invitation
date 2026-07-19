@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import type { RawWeddingDoc } from "@/entities/wedding";
+import type { WeddingTemplateProps } from "@/entities/wedding";
 
 import { Map } from "@/shared/ui/Map/Map";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
@@ -9,11 +9,7 @@ import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
 
 import { PhotoSlot } from "./PhotoSlot";
 
-interface WeddingThirdTemplateProps extends RawWeddingDoc {
-  guestName?: string;
-}
-
-export function WeddingThirdTemplate(props: WeddingThirdTemplateProps): React.JSX.Element {
+export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Element {
   const { guestName, ...wedding } = props;
 
   return (
@@ -45,19 +41,30 @@ export function WeddingThirdTemplate(props: WeddingThirdTemplateProps): React.JS
 
         <div className="relative z-[2] flex w-full flex-1 flex-col items-center justify-between">
           {/* Monogram */}
-          <Image
-            src="/images/p2-t3-couples-name-border.png"
-            alt=""
-            aria-hidden="true"
-            width={92}
-            height={118}
-            className="reveal h-[118px] w-[92px] object-contain"
-          />
+          <div className="reveal relative h-[118px] w-[92px]">
+            <Image
+              src="/images/p2-t3-couples-name-border.png"
+              alt=""
+              aria-hidden="true"
+              width={92}
+              height={118}
+              className="h-full w-full object-contain"
+            />
+            <span
+              className="absolute inset-0 flex flex-col items-center justify-center gap-[1px] pb-[6px] font-script text-[#fbf7ef]"
+              style={{ textShadow: "0 1px 6px rgba(45,43,37,.4)" }}
+            >
+              <span style={{ fontSize: "20px", lineHeight: 1 }}>
+                {wedding.names.a.charAt(0).toUpperCase()}
+              </span>
+              <span style={{ fontSize: "11px", lineHeight: 1, opacity: 0.85 }}>&amp;</span>
+              <span style={{ fontSize: "20px", lineHeight: 1 }}>
+                {wedding.names.b.charAt(0).toUpperCase()}
+              </span>
+            </span>
+          </div>
 
           <div className="flex flex-col items-center">
-            <p className="reveal font-typewriter text-[12px] tracking-[0.42em] text-[#f0e9dc] uppercase">
-              Dear {guestName ?? "Guest"},
-            </p>
             <p
               className="reveal mt-[24px] font-display font-light tracking-[0.36em] text-[#f4ecdd] uppercase"
               style={{ fontSize: "clamp(20px,2.6vw,32px)" }}
@@ -102,6 +109,11 @@ export function WeddingThirdTemplate(props: WeddingThirdTemplateProps): React.JS
             </span>
           </div>
 
+          {guestName && (
+            <p className="reveal mb-6 font-typewriter text-[12px] tracking-[0.42em] text-gold uppercase">
+              Dear {guestName},
+            </p>
+          )}
           <p className="reveal max-w-[640px] text-[15px] leading-[2]">{wedding.message}</p>
 
           <div className="reveal mt-[clamp(64px,9vw,120px)] mr-[clamp(10px,6vw,80px)] self-end text-center">

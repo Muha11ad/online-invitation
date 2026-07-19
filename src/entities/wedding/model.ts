@@ -29,3 +29,7 @@ export interface RawWeddingDoc {
   slug: string;
   template: "first" | "second" | "third";
 }
+
+export interface WeddingTemplateProps extends RawWeddingDoc {
+  guestName?: string;
+}
