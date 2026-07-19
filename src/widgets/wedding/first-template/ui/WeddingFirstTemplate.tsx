@@ -1,4 +1,4 @@
-import type { RawWeddingDoc } from "@/entities/wedding";
+import type { WeddingTemplateProps } from "@/entities/wedding";
 
 import { Map } from "@/shared/ui/Map/Map";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
@@ -7,7 +7,7 @@ import { RevealObserver } from "@/shared/ui/RevealObserver";
 
 import { HeroEntranceObserver } from "./HeroEntranceObserver";
 
-export function WeddingFirstTemplate(wedding: RawWeddingDoc): React.JSX.Element {
+export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.Element {
   const initialA = wedding.names.a.charAt(0).toUpperCase();
   const initialB = wedding.names.b.charAt(0).toUpperCase();
 
@@ -67,6 +67,11 @@ export function WeddingFirstTemplate(wedding: RawWeddingDoc): React.JSX.Element 
       {/* ══ MESSAGE ══ */}
       <section aria-label="Message" className="px-8 py-24">
         <div className="mx-auto max-w-[600px]">
+          {wedding.guestName && (
+            <p className="reveal mb-5 text-center font-sans text-[0.75rem] font-light tracking-[0.18em] text-ink-soft uppercase">
+              Dear {wedding.guestName},
+            </p>
+          )}
           <p
             style={{ fontSize: "clamp(20px, 3vw, 30px)" }}
             className="reveal text-center font-display leading-[1.7] font-light text-ink italic"

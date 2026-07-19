@@ -1,4 +1,4 @@
-import type { RawWeddingDoc } from "@/entities/wedding";
+import type { WeddingTemplateProps } from "@/entities/wedding";
 
 import { Map } from "@/shared/ui/Map/Map";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
@@ -7,7 +7,7 @@ import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
 
 import { EnvelopeGate } from "./EnvelopeGate";
 
-export function WeddingSecondTemplate(wedding: RawWeddingDoc): React.JSX.Element {
+export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.Element {
   return (
     <main className="min-h-screen bg-amber-warm font-sans leading-[1.65] font-light text-forest antialiased">
       <RevealObserver />
@@ -218,7 +218,18 @@ export function WeddingSecondTemplate(wedding: RawWeddingDoc): React.JSX.Element
           >
             Event Details
           </h2>
-          <p className="reveal mx-auto mt-[18px] max-w-[450px] text-[16px] leading-[1.8] text-ink opacity-80">
+          {wedding.guestName && (
+            <p className="reveal mt-[18px] font-sans text-[12px] font-medium tracking-[0.42em] text-terracotta uppercase">
+              Dear {wedding.guestName},
+            </p>
+          )}
+          <p
+            className={
+              wedding.guestName
+                ? "reveal mx-auto mt-2 max-w-[450px] text-[16px] leading-[1.8] text-ink opacity-80"
+                : "reveal mx-auto mt-[18px] max-w-[450px] text-[16px] leading-[1.8] text-ink opacity-80"
+            }
+          >
             {wedding.message}
           </p>
 
