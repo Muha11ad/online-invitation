@@ -1,2 +1,3 @@
 export { getWeddingBySlug } from "./api";
-export type { RawWeddingDoc, WeddingTemplateProps } from "./model";
+export type { LocalizedString, RawWeddingDoc, WeddingTemplateProps } from "./model";
+export { hasCompleteLocale, pick } from "./lib/localization";

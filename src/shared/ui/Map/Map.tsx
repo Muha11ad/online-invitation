@@ -2,15 +2,26 @@
 
 import { useState } from "react";
 
+import { getDictionary, type Locale } from "@/shared/i18n";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/Map/Popover";
-import { buildYandexGoUrl, buildYandexMapsUrl, buildYandexNavigatorUrl } from "@/shared/lib/mapLinks";
-import { Map as MapCanvas, Marker, useVenueMapStyle, type MapPalette } from "@/shared/ui/Map/MapCanvas";
+import {
+  buildYandexGoUrl,
+  buildYandexMapsUrl,
+  buildYandexNavigatorUrl,
+} from "@/shared/lib/mapLinks";
+import {
+  Map as MapCanvas,
+  Marker,
+  useVenueMapStyle,
+  type MapPalette,
+} from "@/shared/ui/Map/MapCanvas";
 
 export function Map(params: MapParams): React.JSX.Element {
   const zoom = params.zoom ?? 16;
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const mapStyle = useVenueMapStyle(params.palette);
+  const dict = getDictionary(params.locale).map;
 
   const mapsUrl = buildYandexMapsUrl(params.lat, params.lon, zoom);
   const goUrl = buildYandexGoUrl(params.lat, params.lon);
@@ -45,7 +56,7 @@ export function Map(params: MapParams): React.JSX.Element {
           className="absolute right-3 bottom-3 z-[1000] cursor-pointer rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-ink shadow-md backdrop-blur-sm hover:bg-white"
           aria-label="Open location in a maps app"
         >
-          Open in Maps
+          {dict.openInMaps}
         </PopoverTrigger>
         <PopoverContent align="end" className="w-56">
           <a
@@ -54,7 +65,7 @@ export function Map(params: MapParams): React.JSX.Element {
             rel="noopener noreferrer"
             className="rounded-md px-2.5 py-2 text-sm hover:bg-muted"
           >
-            Yandex Maps
+            {dict.yandexMaps}
           </a>
           <a
             href={goUrl}
@@ -62,7 +73,7 @@ export function Map(params: MapParams): React.JSX.Element {
             rel="noopener noreferrer"
             className="rounded-md px-2.5 py-2 text-sm hover:bg-muted"
           >
-            Yandex Go
+            {dict.yandexGo}
           </a>
           <a
             href={navigatorUrl}
@@ -70,7 +81,7 @@ export function Map(params: MapParams): React.JSX.Element {
             rel="noopener noreferrer"
             className="rounded-md px-2.5 py-2 text-sm hover:bg-muted"
           >
-            Yandex Navigator
+            {dict.yandexNavigator}
           </a>
         </PopoverContent>
       </Popover>
@@ -83,4 +94,5 @@ interface MapParams {
   lon: number;
   zoom?: number;
   palette: MapPalette;
+  locale: Locale;
 }

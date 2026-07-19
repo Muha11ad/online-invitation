@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 
+import { getDictionary, type Locale } from "@/shared/i18n";
+
 export function EnvelopeGate(params: EnvelopeGateParams): React.JSX.Element | null {
-  const { nameA, nameB } = params;
+  const { husbandName, wifeName, locale } = params;
+  const dict = getDictionary(locale).secondTemplate;
   const [phase, setPhase] = useState<"closed" | "opening" | "gone">("closed");
 
   useEffect(() => {
@@ -32,7 +35,7 @@ export function EnvelopeGate(params: EnvelopeGateParams): React.JSX.Element | nu
   if (phase === "gone") return null;
 
   const isOpening = phase === "opening";
-  const initials = `${nameA.charAt(0).toUpperCase()} & ${nameB.charAt(0).toUpperCase()}`;
+  const initials = `${husbandName.charAt(0).toUpperCase()} & ${wifeName.charAt(0).toUpperCase()}`;
 
   return (
     <>
@@ -370,7 +373,7 @@ export function EnvelopeGate(params: EnvelopeGateParams): React.JSX.Element | nu
               color: "#C8612E",
             }}
           >
-            Click the seal to open
+            {dict.envelopeClickToOpen}
           </span>
           <span
             style={{
@@ -388,6 +391,7 @@ export function EnvelopeGate(params: EnvelopeGateParams): React.JSX.Element | nu
 }
 
 interface EnvelopeGateParams {
-  nameA: string;
-  nameB: string;
+  husbandName: string;
+  wifeName: string;
+  locale: Locale;
 }

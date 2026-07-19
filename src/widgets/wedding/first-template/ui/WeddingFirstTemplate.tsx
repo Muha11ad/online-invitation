@@ -1,5 +1,6 @@
-import type { WeddingTemplateProps } from "@/entities/wedding";
+import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
+import { formatWeddingDate, getDictionary } from "@/shared/i18n";
 import { Map } from "@/shared/ui/Map/Map";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
 import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
@@ -8,8 +9,19 @@ import { RevealObserver } from "@/shared/ui/RevealObserver";
 import { HeroEntranceObserver } from "./HeroEntranceObserver";
 
 export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.Element {
-  const initialA = wedding.names.a.charAt(0).toUpperCase();
-  const initialB = wedding.names.b.charAt(0).toUpperCase();
+  const { locale } = wedding;
+  const dict = getDictionary(locale);
+  const husbandName = pick(wedding.names.husband, locale);
+  const wifeName = pick(wedding.names.wife, locale);
+  const city = pick(wedding.location.city, locale);
+  const venue = pick(wedding.location.venue, locale);
+  const address = pick(wedding.location.address, locale);
+  const message = pick(wedding.message, locale);
+  const dateShort = formatWeddingDate(wedding.date.ddmmyyyy, locale, "short");
+  const dateFull = formatWeddingDate(wedding.date.ddmmyyyy, locale, "full");
+  const dateFormatted = formatWeddingDate(wedding.date.ddmmyyyy, locale, "formatted");
+  const initialA = husbandName.charAt(0).toUpperCase();
+  const initialB = wifeName.charAt(0).toUpperCase();
 
   return (
     <main className="min-h-screen bg-warm-white font-sans leading-[1.65] font-light text-ink antialiased">
@@ -40,7 +52,7 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
           style={{ fontSize: "clamp(32px, 5.5vw, 72px)" }}
           className="mb-[18px] font-display leading-[1.1] font-light tracking-[-0.01em]"
         >
-          {wedding.names.a} <span className="text-sage italic">&amp;</span> {wedding.names.b}
+          {husbandName} <span className="text-sage italic">&amp;</span> {wifeName}
         </h1>
 
         {/* Date · City */}
@@ -48,7 +60,7 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
           data-hero="meta"
           className="font-sans text-[0.75rem] font-light tracking-[0.18em] text-ink-soft uppercase"
         >
-          {wedding.date.short}&nbsp;·&nbsp;{wedding.location.city}
+          {dateShort}&nbsp;·&nbsp;{city}
         </p>
 
         {/* Scroll cue */}
@@ -69,14 +81,14 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
         <div className="mx-auto max-w-[600px]">
           {wedding.guestName && (
             <p className="reveal mb-5 text-center font-sans text-[0.75rem] font-light tracking-[0.18em] text-ink-soft uppercase">
-              Dear {wedding.guestName},
+              {dict.common.dearGuest.replace("{name}", wedding.guestName)}
             </p>
           )}
           <p
             style={{ fontSize: "clamp(20px, 3vw, 30px)" }}
             className="reveal text-center font-display leading-[1.7] font-light text-ink italic"
           >
-            &ldquo;{wedding.message}&rdquo;
+            &ldquo;{message}&rdquo;
           </p>
         </div>
       </section>
@@ -85,7 +97,7 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
       <section aria-label="Event details" className="px-8 py-[108px]">
         <div className="mx-auto max-w-[900px]">
           <p className="reveal mb-[52px] text-center font-sans text-[0.625rem] font-normal tracking-[0.22em] text-ink-soft uppercase">
-            The Day
+            {dict.firstTemplate.detailsOverline}
           </p>
 
           <div className="mb-[52px] border-t border-hairline">
@@ -101,15 +113,16 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
               }
             >
               <span className="pt-[5px] font-sans text-[0.5625rem] font-normal tracking-[0.22em] text-ink-soft uppercase">
-                When
+                {dict.firstTemplate.when}
               </span>
               <span className="w-px self-stretch bg-hairline" aria-hidden="true" />
               <div className="flex flex-col gap-[5px]">
                 <span className="font-display text-[1.2rem] leading-[1.3] font-normal">
-                  {wedding.date.full}
+                  {dateFull}
                 </span>
                 <span className="text-[0.75rem] tracking-[0.06em] text-ink-soft">
-                  Ceremony at {wedding.location.ceremonyTime}&nbsp;·&nbsp;Reception to follow
+                  {dict.firstTemplate.ceremonyAt} {wedding.date.time}&nbsp;·&nbsp;
+                  {dict.firstTemplate.receptionToFollow}
                 </span>
               </div>
             </div>
@@ -126,16 +139,14 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
               }
             >
               <span className="pt-[5px] font-sans text-[0.5625rem] font-normal tracking-[0.22em] text-ink-soft uppercase">
-                Where
+                {dict.firstTemplate.where}
               </span>
               <span className="w-px self-stretch bg-hairline" aria-hidden="true" />
               <div className="flex flex-col gap-[5px]">
                 <span className="font-display text-[1.2rem] leading-[1.3] font-normal">
-                  {wedding.location.venue}
+                  {venue}
                 </span>
-                <span className="text-[0.75rem] tracking-[0.06em] text-ink-soft">
-                  {wedding.location.address}
-                </span>
+                <span className="text-[0.75rem] tracking-[0.06em] text-ink-soft">{address}</span>
               </div>
             </div>
           </div>
@@ -146,6 +157,7 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
               <Map
                 lat={wedding.location.coords.lat}
                 lon={wedding.location.coords.lon}
+                locale={locale}
                 palette={{
                   land: "#f5f0e1",
                   water: "#8a9a82",
@@ -238,11 +250,11 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
         </div>
 
         <div className="reveal">
-          <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="dark" />
+          <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="dark" locale={locale} />
         </div>
 
         <p className="font-sans text-[0.625rem] font-normal tracking-[0.22em] text-ink-soft uppercase">
-          {wedding.date.formatted}
+          {dateFormatted}
         </p>
       </footer>
 

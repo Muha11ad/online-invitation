@@ -1,5 +1,6 @@
-import type { WeddingTemplateProps } from "@/entities/wedding";
+import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
+import { formatWeddingDate, getDictionary } from "@/shared/i18n";
 import { Map } from "@/shared/ui/Map/Map";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
@@ -8,10 +9,20 @@ import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
 import { EnvelopeGate } from "./EnvelopeGate";
 
 export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.Element {
+  const { locale } = wedding;
+  const dict = getDictionary(locale);
+  const husbandName = pick(wedding.names.husband, locale);
+  const wifeName = pick(wedding.names.wife, locale);
+  const venue = pick(wedding.location.venue, locale);
+  const address = pick(wedding.location.address, locale);
+  const message = pick(wedding.message, locale);
+  const dateFull = formatWeddingDate(wedding.date.ddmmyyyy, locale, "full");
+  const dateShort = formatWeddingDate(wedding.date.ddmmyyyy, locale, "short");
+
   return (
     <main className="min-h-screen bg-amber-warm font-sans leading-[1.65] font-light text-forest antialiased">
       <RevealObserver />
-      <EnvelopeGate nameA={wedding.names.a} nameB={wedding.names.b} />
+      <EnvelopeGate husbandName={husbandName} wifeName={wifeName} locale={locale} />
 
       {/* HERO */}
       <section
@@ -107,7 +118,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
         {/* Content */}
         <div style={{ position: "relative", zIndex: 2 }} className="px-6 text-center">
           <p className="font-sans text-[13px] font-medium tracking-[0.46em] text-terracotta uppercase">
-            We&apos;re getting married
+            {dict.secondTemplate.heroKicker}
           </p>
           <h1
             className="font-script text-forest"
@@ -118,7 +129,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
               textShadow: "0 2px 22px rgba(255,250,240,.6),0 1px 0 rgba(255,255,255,.45)",
             }}
           >
-            {wedding.names.a} &amp; {wedding.names.b}
+            {husbandName} &amp; {wifeName}
           </h1>
 
           {/* Diamond divider */}
@@ -152,7 +163,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
           </div>
 
           <p className="font-sans text-[15px] font-medium tracking-[0.4em] text-ink uppercase">
-            {wedding.date.full}
+            {dateFull}
           </p>
         </div>
 
@@ -175,7 +186,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
             className="font-sans text-[10px] tracking-[0.34em] uppercase opacity-60"
             style={{ color: "#2D3A23" }}
           >
-            Scroll
+            {dict.secondTemplate.scroll}
           </span>
           <span
             style={{
@@ -210,17 +221,17 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
       >
         <div className="mx-auto max-w-[680px] text-center">
           <p className="font-sans text-[12px] font-medium tracking-[0.42em] text-terracotta uppercase">
-            The Celebration
+            {dict.secondTemplate.detailsKicker}
           </p>
           <h2
             className="font-display font-medium text-forest"
             style={{ fontSize: "clamp(40px,6vw,68px)", lineHeight: 1.04, margin: "14px 0 0" }}
           >
-            Event Details
+            {dict.secondTemplate.detailsHeading}
           </h2>
           {wedding.guestName && (
             <p className="reveal mt-[18px] font-sans text-[12px] font-medium tracking-[0.42em] text-terracotta uppercase">
-              Dear {wedding.guestName},
+              {dict.common.dearGuest.replace("{name}", wedding.guestName)}
             </p>
           )}
           <p
@@ -230,7 +241,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
                 : "reveal mx-auto mt-[18px] max-w-[450px] text-[16px] leading-[1.8] text-ink opacity-80"
             }
           >
-            {wedding.message}
+            {message}
           </p>
 
           {/* Diamond divider */}
@@ -298,10 +309,10 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
               className="font-display font-semibold text-forest"
               style={{ fontSize: "clamp(26px,3.4vw,36px)", margin: 0 }}
             >
-              Wedding Ceremony
+              {dict.secondTemplate.ceremonyHeading}
             </h3>
             <p className="mt-[12px] font-sans text-[12.5px] tracking-[0.32em] text-terracotta uppercase">
-              {wedding.location.ceremonyTime}
+              {wedding.date.time}
             </p>
 
             <div
@@ -318,10 +329,10 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
               className="font-display font-medium text-forest"
               style={{ fontSize: "clamp(22px,2.6vw,28px)" }}
             >
-              {wedding.location.venue}
+              {venue}
             </p>
             <p className="mt-[8px] font-sans text-[15px] leading-[1.7] text-ink opacity-80">
-              {wedding.location.address}
+              {address}
             </p>
 
             {/* Map */}
@@ -330,6 +341,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
                 <Map
                   lat={wedding.location.coords.lat}
                   lon={wedding.location.coords.lon}
+                  locale={locale}
                   palette={{
                     land: "#efd3bc",
                     water: "#2d3a23",
@@ -354,10 +366,10 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
             style={{ fontSize: "clamp(58px,9vw,108px)", lineHeight: 1 }}
             aria-hidden="true"
           >
-            {wedding.names.a} &amp; {wedding.names.b}
+            {husbandName} &amp; {wifeName}
           </div>
           <p className="mt-[18px] font-sans text-[13px] tracking-[0.4em] text-biscuit uppercase">
-            {wedding.date.short}
+            {dateShort}
           </p>
 
           {/* Diamond divider */}
@@ -391,14 +403,14 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
           </div>
 
           <div className="reveal">
-            <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="light" />
+            <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="light" locale={locale} />
           </div>
 
           <p
             className="mt-[14px] font-sans text-[13px] tracking-[0.05em]"
             style={{ color: "rgba(245,240,225,.72)" }}
           >
-            Made with <span className="text-terracotta">&#9829;</span> for our family &amp; friends
+            {dict.secondTemplate.madeWithLove}
           </p>
         </div>
       </footer>

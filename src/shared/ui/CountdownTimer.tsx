@@ -2,9 +2,12 @@
 
 import { useRef, useSyncExternalStore } from "react";
 
+import { getDictionary, type Locale, type UiStrings } from "@/shared/i18n";
+
 export function CountdownTimer(params: CountdownTimerParams): React.JSX.Element {
   const time = useTimeLeft(params.dateDDMMYYYY);
-  const content: React.ReactNode = getContent(time, params.variant);
+  const dict = getDictionary(params.locale).countdown;
+  const content: React.ReactNode = getContent(time, params.variant, dict);
 
   return (
     <div className="my-[18px] flex flex-col items-center gap-0">
@@ -50,28 +53,32 @@ function subscribeToClock(onStoreChange: () => void): () => void {
   return () => clearInterval(id);
 }
 
-function getContent(time: TimeLeft | null, variant: string): React.ReactNode {
+function getContent(
+  time: TimeLeft | null,
+  variant: string,
+  dict: UiStrings["countdown"],
+): React.ReactNode {
   const valueColor = variant === "light" ? "text-cream" : "text-ink";
   const labelColor = variant === "light" ? "text-biscuit" : "text-ink-soft";
 
   if (time == null) {
     return (
       <p className="font-sans text-[0.7rem] tracking-[0.1em] text-ink-soft">
-        Date was not provided or is invalid
+        {dict.invalidDate}
       </p>
     );
   } else if (time.expired) {
     return (
       <p className="font-display text-sage italic" style={{ fontSize: "clamp(18px, 2.5vw, 26px)" }}>
-        Today is the day ♡
+        {dict.todayIsTheDay}
       </p>
     );
   }
   const units = [
-    { value: pad(time.days), label: "Days" },
-    { value: pad(time.hours), label: "Hours" },
-    { value: pad(time.minutes), label: "Min" },
-    { value: pad(time.seconds), label: "Sec" },
+    { value: pad(time.days), label: dict.days },
+    { value: pad(time.hours), label: dict.hours },
+    { value: pad(time.minutes), label: dict.minutes },
+    { value: pad(time.seconds), label: dict.seconds },
   ];
 
   const unitElements = units.map((u, i) => (
@@ -151,6 +158,7 @@ function pad(n: number): string {
 interface CountdownTimerParams {
   dateDDMMYYYY: string;
   variant: "dark" | "light";
+  locale: Locale;
 }
 
 interface TimeLeft {

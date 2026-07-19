@@ -1,28 +1,29 @@
 import { ObjectId } from "mongodb";
 
+import type { Locale, LocalizedString } from "@/shared/i18n";
+
+export type { LocalizedString };
+
 export interface RawWeddingDoc {
   _id: ObjectId;
   names: {
-    a: string;
-    b: string;
+    husband: LocalizedString;
+    wife: LocalizedString;
   };
   date: {
-    short: string;
-    full: string;
-    formatted: string;
+    time: string;
     ddmmyyyy: string;
   };
   location: {
-    city: string;
-    ceremonyTime: string;
-    venue: string;
-    address: string;
+    city: LocalizedString;
+    venue: LocalizedString;
+    address: LocalizedString;
     coords: {
       lat: number;
       lon: number;
     };
   };
-  message: string;
+  message: LocalizedString;
   music?: string;
   guests?: string[];
   coupleMainImage?: string;
@@ -31,5 +32,6 @@ export interface RawWeddingDoc {
 }
 
 export interface WeddingTemplateProps extends RawWeddingDoc {
+  locale: Locale;
   guestName?: string;
 }
