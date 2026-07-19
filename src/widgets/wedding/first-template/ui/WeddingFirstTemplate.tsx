@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
 import { formatWeddingDate, getDictionary } from "@/shared/i18n";
@@ -13,11 +15,9 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
   const dict = getDictionary(locale);
   const husbandName = pick(wedding.names.husband, locale);
   const wifeName = pick(wedding.names.wife, locale);
-  const city = pick(wedding.location.city, locale);
   const venue = pick(wedding.location.venue, locale);
   const address = pick(wedding.location.address, locale);
   const message = pick(wedding.message, locale);
-  const dateShort = formatWeddingDate(wedding.date.ddmmyyyy, locale, "short");
   const dateFull = formatWeddingDate(wedding.date.ddmmyyyy, locale, "full");
   const dateFormatted = formatWeddingDate(wedding.date.ddmmyyyy, locale, "formatted");
   const initialA = husbandName.charAt(0).toUpperCase();
@@ -33,34 +33,45 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
         aria-label="Hero"
         className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-8 pt-20 pb-[120px] text-center"
       >
-        {/* Monogram */}
+        {/* Wreath + monogram */}
         <div
           aria-hidden="true"
-          data-hero="monogram"
-          style={{ fontSize: "clamp(88px, 20vw, 260px)" }}
-          className="mb-9 font-display leading-none font-light tracking-[-0.02em] text-ink select-none"
+          data-hero="wreath"
+          className="relative mb-8 aspect-square select-none"
+          style={{ width: "clamp(240px, 46vw, 420px)" }}
         >
-          {initialA} <span className="text-sage italic">&amp;</span> {initialB}
+          <Image
+            src="/images/wreath.png"
+            alt=""
+            fill
+            sizes="(min-width: 900px) 420px, 46vw"
+            className="object-contain opacity-90"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span
+              style={{ fontSize: "clamp(32px, 7vw, 68px)" }}
+              className="font-display leading-none font-light tracking-[-0.01em] text-ink"
+            >
+              {initialA} <span className="text-sage italic">&amp;</span> {initialB}
+            </span>
+          </div>
         </div>
-
-        {/* Sage rule */}
-        <div data-hero="rule" aria-hidden="true" className="mx-auto mb-7 h-px w-8 bg-sage" />
 
         {/* Names */}
         <h1
           data-hero="names"
-          style={{ fontSize: "clamp(32px, 5.5vw, 72px)" }}
-          className="mb-[18px] font-display leading-[1.1] font-light tracking-[-0.01em]"
+          style={{ fontSize: "clamp(16px, 2.4vw, 26px)" }}
+          className="mb-3 font-display font-normal tracking-[0.14em] text-ink uppercase"
         >
           {husbandName} <span className="text-sage italic">&amp;</span> {wifeName}
         </h1>
 
-        {/* Date · City */}
+        {/* Date */}
         <p
-          data-hero="meta"
-          className="font-sans text-[0.75rem] font-light tracking-[0.18em] text-ink-soft uppercase"
+          data-hero="date"
+          className="font-sans text-[0.75rem] font-light tracking-[0.18em] text-ink-soft"
         >
-          {dateShort}&nbsp;·&nbsp;{city}
+          {dateFormatted}
         </p>
 
         {/* Scroll cue */}
