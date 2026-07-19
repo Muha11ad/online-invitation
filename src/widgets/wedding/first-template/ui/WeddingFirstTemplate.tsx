@@ -184,41 +184,22 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
         </div>
       </section>
 
-      {/* ══ SCENE (birds + rings) ══ */}
+      {/* ══ SCENE (birds + doves) ══ */}
       <section aria-label="Decorative scene" className="border-t border-b border-hairline">
         <div
           className="relative h-[380px] w-full overflow-hidden bg-warm-white max-[600px]:h-[260px]"
           aria-hidden="true"
         >
-          {/* Interlocked rings */}
-          <div className="pointer-events-none absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2">
-            <svg width="200" height="96" viewBox="10 5 150 82" fill="none">
-              <defs>
-                <clipPath id="ca-right">
-                  <rect x="80" y="-200" width="600" height="600" />
-                </clipPath>
-                <clipPath id="ca-left">
-                  <rect x="-600" y="-200" width="680" height="600" />
-                </clipPath>
-              </defs>
-              <circle
-                cx="80"
-                cy="46"
-                r="35"
-                stroke="#8A9A82"
-                strokeWidth="1.5"
-                clipPath="url(#ca-right)"
-              />
-              <circle cx="120" cy="46" r="35" stroke="#8A9A82" strokeWidth="1.5" />
-              <circle
-                cx="80"
-                cy="46"
-                r="35"
-                stroke="#8A9A82"
-                strokeWidth="1.5"
-                clipPath="url(#ca-left)"
-              />
-            </svg>
+          {/* Doves */}
+          <div className="pointer-events-none absolute top-1/2 left-1/2 z-[2] w-[180px] -translate-x-1/2 -translate-y-1/2 opacity-80">
+            <Image
+              src="/images/wedding-birds.png"
+              alt=""
+              width={1536}
+              height={1024}
+              sizes="180px"
+              className="h-auto w-full"
+            />
           </div>
 
           {/* Birds */}
