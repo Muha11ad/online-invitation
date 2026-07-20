@@ -230,12 +230,6 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
           >
             {dict.thirdTemplate.eveningBlurb}
           </p>
-          <a
-            href="#venue"
-            className="reveal border-b border-parchment/50 pb-[5px] text-[12px] tracking-[0.28em] text-parchment uppercase transition-colors hover:border-parchment"
-          >
-            {dict.thirdTemplate.tapToViewDetails}
-          </a>
         </div>
       </section>
 
@@ -307,13 +301,6 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
           <div className="reveal mb-[clamp(38px,5vw,52px)]">
             <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="dark" locale={locale} />
           </div>
-
-          <a
-            href="#top"
-            className="reveal border-b border-transparent pb-[4px] text-[11px] tracking-[0.3em] text-gold uppercase transition-colors hover:border-gold"
-          >
-            {dict.thirdTemplate.backToTop}
-          </a>
         </div>
       </footer>
 

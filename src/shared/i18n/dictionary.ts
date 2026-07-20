@@ -40,11 +40,9 @@ export interface UiStrings {
     ceremonyReceptionKicker: string;
     weddingDetailsHeading: string;
     eveningBlurb: string;
-    tapToViewDetails: string;
     venueHeading: string;
     arriveBefore: string;
     arriveBeforeSuffix: string;
-    backToTop: string;
   };
   map: {
     openInMaps: string;
@@ -112,11 +110,9 @@ const en: UiStrings = {
     weddingDetailsHeading: "Wedding Details",
     eveningBlurb:
       "An evening of dinner, dancing, and stories under the string lights — stay late, we insist.",
-    tapToViewDetails: "Tap here to view details",
     venueHeading: "The Venue",
     arriveBefore: "Arrive a little before",
     arriveBeforeSuffix: "to find your seat before the ceremony begins.",
-    backToTop: "Back to top",
   },
   map: {
     openInMaps: "Open in Maps",
@@ -184,11 +180,9 @@ const ru: UiStrings = {
     weddingDetailsHeading: "Детали свадьбы",
     eveningBlurb:
       "Вечер ужина, танцев и историй под гирляндами огней — оставайтесь подольше, мы настаиваем.",
-    tapToViewDetails: "Нажмите, чтобы увидеть детали",
     venueHeading: "Место проведения",
     arriveBefore: "Приходите немного раньше",
     arriveBeforeSuffix: "чтобы найти свои места до начала церемонии.",
-    backToTop: "Наверх",
   },
   map: {
     openInMaps: "Открыть на карте",
@@ -256,11 +250,9 @@ const uz: UiStrings = {
     weddingDetailsHeading: "To'y tafsilotlari",
     eveningBlurb:
       "Kechki ovqat, raqs va hikoyalar bilan to'lib-toshgan kech — uzoqroq qoling, biz shuni istaymiz.",
-    tapToViewDetails: "Tafsilotlarni ko'rish uchun bosing",
     venueHeading: "Manzil",
     arriveBefore: "O'rningizni band qilish uchun soat",
     arriveBeforeSuffix: "dan birozroq oldin keling.",
-    backToTop: "Yuqoriga",
   },
   map: {
     openInMaps: "Xaritada ochish",
@@ -316,7 +308,7 @@ const kiril: UiStrings = {
     envelopeClickToOpen: "Очиш учун муҳрга босинг",
   },
   thirdTemplate: {
-    heroKicker: "Тўй эгалари",
+	heroKicker: "Биз турмуш қурмоқдамиз",
     forever: "Бизнинг абадиятимиз",
     begins: "бошланмоқда",
     withLove: "Муҳаббат билан,",
@@ -328,11 +320,9 @@ const kiril: UiStrings = {
     weddingDetailsHeading: "Тўй тафсилотлари",
     eveningBlurb:
       "Кечки овқат, рақс ва ҳикоялар билан тўлиб-тошган кеч — узоқроқ қолинг, биз шуни истаймиз.",
-    tapToViewDetails: "Тафсилотларни кўриш учун босинг",
     venueHeading: "Манзил",
     arriveBefore: "Ўрнингизни банд қилиш учун соат",
     arriveBeforeSuffix: "дан бирозроқ олдин келинг.",
-    backToTop: "Юқорига",
   },
   map: {
     openInMaps: "Харитада очиш",
