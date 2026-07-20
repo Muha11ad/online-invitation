@@ -230,21 +230,21 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
           {/* Fountain */}
           <div
             aria-hidden="true"
-            className="reveal relative mx-auto mb-[42px] w-full max-w-[580px] overflow-hidden rounded-[5px]"
-            style={{ height: "clamp(120px, 16vw, 150px)" }}
+            className="reveal reveal-pop relative mx-auto mb-[42px] w-full max-w-[420px]"
           >
             <Image
               src="/images/fountain.png"
               alt=""
-              fill
-              sizes="(min-width: 680px) 580px, 90vw"
-              className="object-cover"
+              width={1536}
+              height={1024}
+              sizes="(min-width: 680px) 420px, 80vw"
+              className="h-auto w-full object-contain"
             />
           </div>
 
           {/* Details card */}
           <div
-            className="reveal rounded-[6px] bg-sage-mist text-center"
+            className="reveal reveal-pop rounded-[6px] bg-warm-sand text-center"
             style={{
               padding: "clamp(38px,5vw,58px) clamp(28px,5vw,52px)",
               boxShadow: "0 34px 64px rgba(120,80,40,.16),0 4px 12px rgba(120,80,40,.08)",

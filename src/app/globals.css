@@ -21,7 +21,7 @@
   --color-amber-warm: #e9ddc4;
   --color-cream: #f5f0e1;
   --color-biscuit: #efd3bc;
-  --color-sage-mist: #e9ead9;
+  --color-warm-sand: #f3ead9;
   --color-terracotta: #c8612e;
   --color-forest: #2d3a23;
 
@@ -211,6 +211,14 @@
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.reveal-pop {
+  transform: translateY(28px) scale(0.92);
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.reveal-pop.visible {
+  transform: translateY(0) scale(1);
 }
 
 .hero-enter {
