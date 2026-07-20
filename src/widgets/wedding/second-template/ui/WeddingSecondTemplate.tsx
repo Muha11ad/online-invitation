@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
 import { formatWeddingDate, getDictionary } from "@/shared/i18n";
@@ -36,72 +38,24 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
           justifyContent: "center",
         }}
       >
-        {/* Animated ambient background */}
-        <div
-          data-hero-bg=""
+        {/* Video background */}
+        <video
           aria-hidden="true"
+          autoPlay
+          muted
+          loop
+          playsInline
           style={{
             position: "absolute",
             inset: 0,
             zIndex: 0,
-            background: "linear-gradient(165deg,#f2e9d4 0%,#e7d7bb 46%,#c9b893 100%)",
-            animation: "heroPan 30s ease-in-out infinite",
-            willChange: "transform",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              width: "48vw",
-              height: "48vw",
-              left: "-7vw",
-              top: "-9vw",
-              borderRadius: "50%",
-              background: "radial-gradient(circle,rgba(239,211,188,.9),transparent 70%)",
-              filter: "blur(42px)",
-              animation: "blobA 24s ease-in-out infinite",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              width: "42vw",
-              height: "42vw",
-              right: "-9vw",
-              top: "6vw",
-              borderRadius: "50%",
-              background: "radial-gradient(circle,rgba(255,248,233,.82),transparent 70%)",
-              filter: "blur(48px)",
-              animation: "blobB 30s ease-in-out infinite",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              width: "44vw",
-              height: "44vw",
-              left: "16vw",
-              bottom: "-16vw",
-              borderRadius: "50%",
-              background: "radial-gradient(circle,rgba(120,138,92,.42),transparent 70%)",
-              filter: "blur(56px)",
-              animation: "blobA 34s ease-in-out infinite reverse",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              width: "26vw",
-              height: "26vw",
-              right: "20vw",
-              bottom: "4vw",
-              borderRadius: "50%",
-              background: "radial-gradient(circle,rgba(200,97,46,.26),transparent 70%)",
-              filter: "blur(46px)",
-              animation: "blobB 26s ease-in-out infinite",
-            }}
-          />
-        </div>
+          <source src="/video/hero-video.mp4" type="video/mp4" />
+        </video>
 
         {/* Legibility overlay */}
         <div
@@ -110,8 +64,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
             position: "absolute",
             inset: 0,
             zIndex: 1,
-            background:
-              "radial-gradient(120% 110% at 50% 40%,rgba(248,243,230,.55) 0%,rgba(244,238,222,.18) 38%,transparent 60%),radial-gradient(135% 120% at 50% 44%,transparent 50%,rgba(45,58,35,.22))",
+            background: "rgba(255,255,255,0.42)",
           }}
         />
 
@@ -274,9 +227,24 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
             />
           </div>
 
+          {/* Fountain */}
+          <div
+            aria-hidden="true"
+            className="reveal relative mx-auto mb-[42px] w-full max-w-[580px] overflow-hidden rounded-[5px]"
+            style={{ height: "clamp(120px, 16vw, 150px)" }}
+          >
+            <Image
+              src="/images/fountain.png"
+              alt=""
+              fill
+              sizes="(min-width: 680px) 580px, 90vw"
+              className="object-cover"
+            />
+          </div>
+
           {/* Details card */}
           <div
-            className="reveal rounded-[6px] bg-biscuit text-center"
+            className="reveal rounded-[6px] bg-sage-mist text-center"
             style={{
               padding: "clamp(38px,5vw,58px) clamp(28px,5vw,52px)",
               boxShadow: "0 34px 64px rgba(120,80,40,.16),0 4px 12px rgba(120,80,40,.08)",
