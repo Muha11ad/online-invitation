@@ -249,11 +249,12 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
         <p className="font-sans text-[0.625rem] font-normal tracking-[0.22em] text-ink-soft uppercase">
           {dateFormatted}
         </p>
+
+        <ContactLink className="mt-[40px] text-ink-soft" />
       </footer>
 
       {/* ══ MUSIC BUTTON ══ */}
       {wedding.music && <MusicButton src={wedding.music} />}
-      <ContactLink />
     </main>
   );
 }

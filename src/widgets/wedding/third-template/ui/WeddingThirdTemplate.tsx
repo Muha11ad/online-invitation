@@ -302,11 +302,12 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
           <div className="reveal mb-[clamp(38px,5vw,52px)]">
             <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="dark" locale={locale} />
           </div>
+
+          <ContactLink className="mt-[40px] text-gold-dark" />
         </div>
       </footer>
 
       {wedding.music && <MusicButton src={wedding.music} />}
-      <ContactLink />
     </main>
   );
 }
