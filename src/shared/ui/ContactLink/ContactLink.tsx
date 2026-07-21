@@ -15,7 +15,7 @@ export function ContactLink(params: ContactLinkParams): React.JSX.Element {
       rel="noopener noreferrer"
       aria-label="Contact via Telegram"
       className={cn(
-        "inline-flex items-center gap-[6px] opacity-80 transition-opacity duration-200 hover:opacity-100",
+        "inline-flex items-center gap-[2px] opacity-80 transition-opacity duration-200 hover:opacity-100",
         className,
       )}
     >
