@@ -381,11 +381,12 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
           >
             {dict.secondTemplate.madeWithLove}
           </p>
+
+          <ContactLink className="mt-[44px] text-[rgba(245,240,225,.72)]" />
         </div>
       </footer>
 
       {wedding.music && <MusicButton src={wedding.music} autoplayOnMount={false} />}
-      <ContactLink />
     </main>
   );
 }
