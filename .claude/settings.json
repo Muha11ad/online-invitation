@@ -1,6 +1,36 @@
 {
 	"permissions": {
-		"defaultMode": "bypassPermissions",
-		"default": "auto"
+		"allow": [
+			"Read",
+			"Grep",
+			"Glob",
+			"Bash(git*)",
+			"Bash(rm -rf*)",
+			"Bash(npm test*)",
+			"Bash(npm run test*)",
+			"Bash(npm run lint*)",
+			"Bash(pytest *)",
+			"Bash(go test *)",
+			"Edit",
+			"Write",
+			"Read(./.env*)",
+			"Bash(cd /Users/mim/Projects/ && git*)",
+			"Bash(cd /Users/mim/Projects/ && grep*)",
+			"Bash(sips -g pixelWidth -g pixelHeight /Users/mim/Projects/online-invitation/public/images/fountain.png)",
+			"Bash(lsof -i :3000 -sTCP:LISTEN)",
+			"Bash(pkill -f \"PORT=3005\")",
+			"Bash(sips -g pixelWidth -g pixelHeight -g hasAlpha /Users/mim/Projects/online-invitation/public/images/fountain.png)",
+			"Bash(find /Users/mim/Projects/online-invitation -iname \"*telegram*\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" 2>/dev/null; echo \"---worktree public---\"; ls -la public/images/*.webp 2>/dev/null; find . -iname \"*.webp\" -not -path \"*/node_modules/*\")",
+			"Bash(node -e ' *)",
+			"Bash(python3 -c *)",
+			"Bash(npx tsc *)",
+			"Bash(cp /Users/mim/Projects/online-invitation/.env /Users/mim/Projects/online-invitation/.claude/worktrees/template-3-landing-page-42eb05/.env && echo copied)",
+			"Bash(lsof -ti:3000)",
+			"Bash(xargs -r ps -p)",
+			"kill -9 $(lsof -ti:3000)",
+			"Bash(lsof -ti:3005)",
+			"Bash(xargs -r ps -p)"
+		],
+		"deny": []
 	}
 }

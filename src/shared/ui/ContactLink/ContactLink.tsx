@@ -13,7 +13,7 @@ export function ContactLink(): React.JSX.Element {
       className="fixed bottom-7 left-7 z-[150] flex items-center gap-[6px] rounded-full bg-white/90 py-[6px] pr-3 pl-[6px] text-ink shadow-md backdrop-blur-sm transition-colors duration-200 hover:bg-white"
     >
       <Image
-        src="/images/telegram_logo.webp"
+        src="/images/telegram_logo.png"
         alt=""
         width={1280}
         height={1280}
