@@ -4,6 +4,7 @@ import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
 import { formatWeddingDate, getDictionary } from "@/shared/i18n";
 import { Map } from "@/shared/ui/Map/Map";
+import { ContactLink } from "@/shared/ui/ContactLink/ContactLink";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
 import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
@@ -384,6 +385,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
       </footer>
 
       {wedding.music && <MusicButton src={wedding.music} autoplayOnMount={false} />}
+      <ContactLink />
     </main>
   );
 }
