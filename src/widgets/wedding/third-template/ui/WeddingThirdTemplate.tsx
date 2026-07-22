@@ -3,6 +3,7 @@ import Image from "next/image";
 import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
 import { formatWeddingDate, getDictionary } from "@/shared/i18n";
+import { MEDIA_LINKS } from "@/shared/lib/mediaLinks";
 import { Map } from "@/shared/ui/Map/Map";
 import { ContactLink } from "@/shared/ui/ContactLink/ContactLink";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
@@ -36,7 +37,7 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
         style={{ padding: "clamp(38px,6vh,74px) 24px" }}
       >
         <PhotoSlot
-          src="/images/p2-t3-hero-image.jpg"
+          src={MEDIA_LINKS.thirdTemplate.heroImage}
           gradient="linear-gradient(165deg,#4a4534,#2d2b25)"
           className="absolute inset-0 z-0"
         />
@@ -53,7 +54,7 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
           {/* Monogram */}
           <div className="reveal relative h-[118px] w-[92px]">
             <Image
-              src="/images/p2-t3-couples-name-border.png"
+              src={MEDIA_LINKS.thirdTemplate.couplesNameBorder}
               alt=""
               aria-hidden="true"
               width={92}
@@ -74,16 +75,16 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
             </span>
           </div>
 
-            <h1
-              className="reveal mt-[10px] font-script text-[#fbf7ef]"
-              style={{
-                fontSize: "clamp(60px,9.5vw,132px)",
-                lineHeight: 1.02,
-                textShadow: "0 2px 22px rgba(45,43,37,.35)",
-              }}
-            >
-              {husbandName} &amp; {wifeName}
-            </h1>
+          <h1
+            className="reveal mt-[10px] font-script text-[#fbf7ef]"
+            style={{
+              fontSize: "clamp(60px,9.5vw,132px)",
+              lineHeight: 1.02,
+              textShadow: "0 2px 22px rgba(45,43,37,.35)",
+            }}
+          >
+            {husbandName} &amp; {wifeName}
+          </h1>
 
           <p className="reveal font-typewriter text-[12px] leading-[2.2] tracking-[0.34em] text-[#e8ddca] uppercase">
             {dateFull}
@@ -153,14 +154,14 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
               style={{ top: "21%", left: "21%", right: "21%", bottom: "22%" }}
             >
               <PhotoSlot
-                src={wedding.coupleMainImage ?? "/images/third-template/couple.jpg"}
+                src={wedding.coupleMainImage}
                 alt={`${husbandName} and ${wifeName}`}
                 gradient="linear-gradient(160deg,#d9cfba,#e6e4dd)"
                 className="h-full w-full"
               />
             </div>
             <Image
-              src="/images/p2-t3-couple-border-image.png"
+              src={MEDIA_LINKS.thirdTemplate.coupleBorderImage}
               alt=""
               aria-hidden="true"
               width={1024}
@@ -187,7 +188,7 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
         style={{ minHeight: "clamp(640px,92vh,920px)" }}
       >
         <PhotoSlot
-          src="/images/p2-t3-wd-back.jpg"
+          src={MEDIA_LINKS.thirdTemplate.weddingDetailsBackground}
           gradient="linear-gradient(165deg,#4a4534,#2d2b25)"
           className="absolute inset-0"
         />

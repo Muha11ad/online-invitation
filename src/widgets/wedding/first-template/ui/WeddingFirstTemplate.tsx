@@ -3,6 +3,7 @@ import Image from "next/image";
 import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
 import { formatWeddingDate, getDictionary } from "@/shared/i18n";
+import { MEDIA_LINKS } from "@/shared/lib/mediaLinks";
 import { Map } from "@/shared/ui/Map/Map";
 import { ContactLink } from "@/shared/ui/ContactLink/ContactLink";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
@@ -42,7 +43,7 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
           style={{ width: "clamp(240px, 46vw, 420px)" }}
         >
           <Image
-            src="/images/wreath.png"
+            src={MEDIA_LINKS.firstTemplate.wreath}
             alt=""
             fill
             sizes="(min-width: 900px) 420px, 46vw"
@@ -194,7 +195,7 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
           {/* Doves */}
           <div className="pointer-events-none absolute top-1/2 left-1/2 z-[2] w-[180px] -translate-x-1/2 -translate-y-1/2 opacity-80">
             <Image
-              src="/images/wedding-birds.png"
+              src={MEDIA_LINKS.firstTemplate.weddingBirds}
               alt=""
               width={1536}
               height={1024}

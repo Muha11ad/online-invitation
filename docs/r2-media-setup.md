@@ -73,3 +73,32 @@ When a domain is purchased:
   line is already there for this).
 - Update the URLs stored in Mongo to use the new domain instead of
   `pub-<id>.r2.dev`.
+
+## 8. Template chrome assets
+
+Not all media is per-wedding. Templates also ship their own static chrome —
+wreaths, decorative photos, background video, the shared telegram logo — that
+is the same for every wedding using that template. These live under a
+separate prefix:
+
+```
+templates/<template-name>/images/<file-name>
+templates/<template-name>/videos/<file-name>
+templates/shared/images/<file-name>
+```
+
+`<template-name>` is `first` / `second` / `third`; `templates/shared/` holds
+assets reused across templates (currently just the telegram logo).
+
+Uploads for these are scripted, not manual — see
+`scripts/upload-media-to-r2.sh` for the local→key manifest and the
+`npx wrangler r2 object put` calls that upload each file.
+
+`src/shared/lib/mediaLinks.ts` is the single place the resulting public URLs
+live (`R2_PUBLIC_BASE` + a `MEDIA_LINKS` object keyed by template). Templates
+import from there instead of hardcoding `/images/...` paths, so:
+
+- Custom-domain migration (see step 7) only requires updating
+  `R2_PUBLIC_BASE` in `mediaLinks.ts`, plus `next.config.ts` and the
+  per-wedding URLs stored in Mongo as described above — no template file
+  needs to change.

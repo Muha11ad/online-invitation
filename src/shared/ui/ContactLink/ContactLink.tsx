@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { MEDIA_LINKS } from "@/shared/lib/mediaLinks";
 import { cn } from "@/shared/lib/utils";
 
 // TODO: replace with the actual Telegram handle
@@ -23,7 +24,7 @@ export function ContactLink(params: ContactLinkParams): React.JSX.Element {
         made with care
       </span>
       <Image
-        src="/images/telegram_logo.png"
+        src={MEDIA_LINKS.shared.telegramLogo}
         alt=""
         width={1280}
         height={1280}

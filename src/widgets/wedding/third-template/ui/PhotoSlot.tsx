@@ -8,7 +8,7 @@ export function PhotoSlot(params: PhotoSlotParams): React.JSX.Element {
       aria-hidden={alt ? undefined : "true"}
       className={className}
       style={{
-        backgroundImage: `url('${src}'), ${gradient}`,
+        backgroundImage: src ? `url('${src}'), ${gradient}` : gradient,
         backgroundSize: "cover",
         backgroundPosition: "center",
         ...style,
@@ -18,7 +18,7 @@ export function PhotoSlot(params: PhotoSlotParams): React.JSX.Element {
 }
 
 interface PhotoSlotParams {
-  src: string;
+  src?: string;
   alt?: string;
   gradient: string;
   className?: string;

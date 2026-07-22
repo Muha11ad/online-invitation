@@ -3,6 +3,7 @@ import Image from "next/image";
 import { pick, type WeddingTemplateProps } from "@/entities/wedding";
 
 import { formatWeddingDate, getDictionary } from "@/shared/i18n";
+import { MEDIA_LINKS } from "@/shared/lib/mediaLinks";
 import { Map } from "@/shared/ui/Map/Map";
 import { ContactLink } from "@/shared/ui/ContactLink/ContactLink";
 import { RevealObserver } from "@/shared/ui/RevealObserver";
@@ -55,7 +56,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
             objectFit: "cover",
           }}
         >
-          <source src="/video/hero-video.mp4" type="video/mp4" />
+          <source src={MEDIA_LINKS.secondTemplate.heroVideo} type="video/mp4" />
         </video>
 
         {/* Legibility overlay */}
@@ -234,7 +235,7 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
             className="reveal reveal-pop relative mx-auto mb-[42px] w-full max-w-[420px]"
           >
             <Image
-              src="/images/fountain.png"
+              src={MEDIA_LINKS.secondTemplate.fountain}
               alt=""
               width={1536}
               height={1024}
