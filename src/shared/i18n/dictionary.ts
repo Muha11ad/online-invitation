@@ -25,11 +25,9 @@ export interface UiStrings {
     detailsKicker: string;
     detailsHeading: string;
     ceremonyHeading: string;
-    madeWithLove: string;
     envelopeClickToOpen: string;
   };
   thirdTemplate: {
-    heroKicker: string;
     forever: string;
     begins: string;
     withLove: string;
@@ -41,8 +39,6 @@ export interface UiStrings {
     weddingDetailsHeading: string;
     eveningBlurb: string;
     venueHeading: string;
-    arriveBefore: string;
-    arriveBeforeSuffix: string;
   };
   map: {
     openInMaps: string;
@@ -94,11 +90,9 @@ const en: UiStrings = {
     detailsKicker: "The Celebration",
     detailsHeading: "Event Details",
     ceremonyHeading: "Wedding Ceremony",
-    madeWithLove: "Made with ♥ for our family & friends",
     envelopeClickToOpen: "Click the seal to open",
   },
   thirdTemplate: {
-    heroKicker: "The Wedding Of",
     forever: "Our Forever",
     begins: "Begins",
     withLove: "With love,",
@@ -110,9 +104,7 @@ const en: UiStrings = {
     weddingDetailsHeading: "Wedding Details",
     eveningBlurb:
       "An evening of dinner, dancing, and stories under the string lights — stay late, we insist.",
-    venueHeading: "The Venue",
-    arriveBefore: "Arrive a little before",
-    arriveBeforeSuffix: "to find your seat before the ceremony begins.",
+    venueHeading: "The Venue"
   },
   map: {
     openInMaps: "Open in Maps",
@@ -141,7 +133,7 @@ const en: UiStrings = {
 
 const ru: UiStrings = {
   common: {
-    dearGuest: "Дорогие {name},",
+    dearGuest: "Дорогой {name},",
   },
   countdown: {
     days: "Дней",
@@ -164,11 +156,9 @@ const ru: UiStrings = {
     detailsKicker: "Торжество",
     detailsHeading: "Детали события",
     ceremonyHeading: "Свадебная церемония",
-    madeWithLove: "Сделано с ♥ для наших родных и друзей",
     envelopeClickToOpen: "Нажмите на печать, чтобы открыть",
   },
   thirdTemplate: {
-    heroKicker: "Свадьба",
     forever: "Наша история",
     begins: "начинается",
     withLove: "С любовью,",
@@ -180,9 +170,7 @@ const ru: UiStrings = {
     weddingDetailsHeading: "Детали свадьбы",
     eveningBlurb:
       "Вечер ужина, танцев и историй под гирляндами огней — оставайтесь подольше, мы настаиваем.",
-    venueHeading: "Место проведения",
-    arriveBefore: "Приходите немного раньше",
-    arriveBeforeSuffix: "чтобы найти свои места до начала церемонии.",
+    venueHeading: "Место проведения"
   },
   map: {
     openInMaps: "Открыть на карте",
@@ -234,11 +222,9 @@ const uz: UiStrings = {
     detailsKicker: "Tantana",
     detailsHeading: "Tadbir tafsilotlari",
     ceremonyHeading: "Nikoh marosimi",
-    madeWithLove: "Oila va do'stlarimiz uchun ♥ bilan yaratildi",
     envelopeClickToOpen: "Ochish uchun muhrga bosing",
   },
   thirdTemplate: {
-    heroKicker: "To'y egalari",
     forever: "Bizning abadiyatimiz",
     begins: "boshlanmoqda",
     withLove: "Muhabbat bilan,",
@@ -250,9 +236,7 @@ const uz: UiStrings = {
     weddingDetailsHeading: "To'y tafsilotlari",
     eveningBlurb:
       "Kechki ovqat, raqs va hikoyalar bilan to'lib-toshgan kech — uzoqroq qoling, biz shuni istaymiz.",
-    venueHeading: "Manzil",
-    arriveBefore: "O'rningizni band qilish uchun soat",
-    arriveBeforeSuffix: "dan birozroq oldin keling.",
+    venueHeading: "Manzil"
   },
   map: {
     openInMaps: "Xaritada ochish",
@@ -304,11 +288,9 @@ const kiril: UiStrings = {
     detailsKicker: "Тантана",
     detailsHeading: "Тадбир тафсилотлари",
     ceremonyHeading: "Никоҳ маросими",
-    madeWithLove: "Оила ва дўстларимиз учун ♥ билан яратилди",
     envelopeClickToOpen: "Очиш учун муҳрга босинг",
   },
   thirdTemplate: {
-	heroKicker: "Биз турмуш қурмоқдамиз",
     forever: "Бизнинг абадиятимиз",
     begins: "бошланмоқда",
     withLove: "Муҳаббат билан,",
@@ -320,9 +302,7 @@ const kiril: UiStrings = {
     weddingDetailsHeading: "Тўй тафсилотлари",
     eveningBlurb:
       "Кечки овқат, рақс ва ҳикоялар билан тўлиб-тошган кеч — узоқроқ қолинг, биз шуни истаймиз.",
-    venueHeading: "Манзил",
-    arriveBefore: "Ўрнингизни банд қилиш учун соат",
-    arriveBeforeSuffix: "дан бирозроқ олдин келинг.",
+    venueHeading: "Манзил"
   },
   map: {
     openInMaps: "Харитада очиш",

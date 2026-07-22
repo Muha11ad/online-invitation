@@ -375,13 +375,6 @@ export function WeddingSecondTemplate(wedding: WeddingTemplateProps): React.JSX.
             <CountdownTimer dateDDMMYYYY={wedding.date.ddmmyyyy} variant="light" locale={locale} />
           </div>
 
-          <p
-            className="mt-[14px] font-sans text-[13px] tracking-[0.05em]"
-            style={{ color: "rgba(245,240,225,.72)" }}
-          >
-            {dict.secondTemplate.madeWithLove}
-          </p>
-
           <ContactLink className="mt-[44px] text-[rgba(245,240,225,.72)]" />
         </div>
       </footer>

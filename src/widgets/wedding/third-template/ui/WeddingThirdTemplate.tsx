@@ -74,13 +74,6 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
             </span>
           </div>
 
-          <div className="flex flex-col items-center">
-            <p
-              className="reveal mt-[24px] font-display font-light tracking-[0.36em] text-[#f4ecdd] uppercase"
-              style={{ fontSize: "clamp(20px,2.6vw,32px)" }}
-            >
-              {dict.thirdTemplate.heroKicker}
-            </p>
             <h1
               className="reveal mt-[10px] font-script text-[#fbf7ef]"
               style={{
@@ -91,7 +84,6 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
             >
               {husbandName} &amp; {wifeName}
             </h1>
-          </div>
 
           <p className="reveal font-typewriter text-[12px] leading-[2.2] tracking-[0.34em] text-[#e8ddca] uppercase">
             {dateFull}
@@ -274,11 +266,6 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
                 {venue}
               </div>
               <div className="mt-[14px] text-[14px] leading-[2] tracking-[0.04em]">{address}</div>
-              <div className="my-[22px] h-px w-[48px] bg-gold" aria-hidden="true" />
-              <p className="text-[13.5px] leading-[2]">
-                {dict.thirdTemplate.arriveBefore} {wedding.date.time}{" "}
-                {dict.thirdTemplate.arriveBeforeSuffix}
-              </p>
             </div>
           </div>
         </div>
