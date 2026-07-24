@@ -1,5 +1,6 @@
 import { LOCALES } from "@/shared/i18n";
 import type { LocalizedString } from "@/shared/i18n";
+import { TemplateType } from "@/shared/types/templates";
 
 import type { RawWeddingDoc } from "../model";
 
@@ -25,7 +26,7 @@ export const NULLABLE_WEDDING_FIELDS = [
 ] as const satisfies ReadonlyArray<keyof RawWeddingDoc>;
 
 const DDMMYYYY_PATTERN = /^\d{2}-\d{2}-\d{4}$/;
-const TEMPLATES: ReadonlyArray<RawWeddingDoc["template"]> = ["first", "second", "third"];
+const TEMPLATES: ReadonlyArray<RawWeddingDoc["template"]> = Object.values(TemplateType);
 
 export interface WeddingInputValue {
   template?: RawWeddingDoc["template"];

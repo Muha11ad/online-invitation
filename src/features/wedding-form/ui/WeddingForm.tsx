@@ -11,6 +11,7 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
+import { TemplateType } from "@/shared/types/templates";
 
 import { ddmmyyyyToInputDate, inputDateToDdmmyyyy } from "../lib/date";
 import { guestsToText, parseGuestsInput } from "../lib/guests";
@@ -19,11 +20,11 @@ import { SLUG_PATTERN, buildAutoSlug } from "../lib/slug";
 import { LocalizedInput } from "./LocalizedInput";
 import { MediaUploadSlot } from "./MediaUploadSlot";
 
-const TEMPLATE_OPTIONS: ReadonlyArray<{ value: RawWeddingDoc["template"]; label: string }> = [
-  { value: "first", label: "First" },
-  { value: "second", label: "Second" },
-  { value: "third", label: "Third" },
-];
+// Derived from the TemplateType enum so adding a template there is the only
+// change needed to surface it in the picker. Label is the value capitalized.
+const TEMPLATE_OPTIONS: ReadonlyArray<{ value: TemplateType; label: string }> = Object.values(
+  TemplateType,
+).map((value) => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1) }));
 
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -33,7 +34,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   const slugInputRef = useRef<HTMLInputElement>(null);
 
   const [template, setTemplate] = useState<RawWeddingDoc["template"]>(
-    initialValue?.template ?? "first",
+    initialValue?.template ?? TemplateType.FIRST,
   );
   const [husband, setHusband] = useState<LocalizedString>(
     initialValue?.names.husband ?? emptyLocalizedString(),
@@ -108,7 +109,8 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       message,
       guests: parseGuestsInput(guestsText) ?? clearedValue,
       music: music || clearedValue,
-      coupleMainImage: template === "third" ? coupleMainImage || clearedValue : undefined,
+      coupleMainImage:
+        template === TemplateType.THIRD ? coupleMainImage || clearedValue : undefined,
     };
   }
 
@@ -187,7 +189,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
           </Select>
         </div>
 
-        {template === "third" && (
+        {template === TemplateType.THIRD && (
           <div className="flex flex-col gap-1.5">
             <Label>Couple main image</Label>
             <MediaUploadSlot

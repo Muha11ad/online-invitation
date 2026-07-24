@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { TemplateType } from "../../../shared/types/templates";
+
 import type { RawWeddingDoc } from "../model";
 import { hasCompleteLocale, pick } from "./localization";
 
@@ -19,7 +21,7 @@ function buildDoc(overrides: Partial<RawWeddingDoc> = {}): RawWeddingDoc {
     },
     message: { en: "Hello", ru: "Привет", uz: "Salom", kiril: "Салом" },
     slug: "test-slug",
-    template: "first",
+    template: TemplateType.FIRST,
     ...overrides,
   };
 }

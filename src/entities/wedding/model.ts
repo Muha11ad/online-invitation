@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 import type { Locale, LocalizedString } from "@/shared/i18n";
+import type { TemplateType } from "@/shared/types/templates";
 
 export type { LocalizedString };
 
@@ -28,7 +29,7 @@ export interface RawWeddingDoc {
   guests?: string[];
   coupleMainImage?: string;
   slug: string;
-  template: "first" | "second" | "third";
+  template: TemplateType;
 }
 
 export interface WeddingTemplateProps extends RawWeddingDoc {
