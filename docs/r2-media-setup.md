@@ -1,8 +1,15 @@
 # Cloudflare R2 media setup
 
-This is a manual, dashboard-driven workflow — there is no admin UI for uploads
-yet. Media files are uploaded by hand to R2, and their public URLs are pasted
-directly into the wedding document in MongoDB.
+> **Note:** an admin panel now exists at `/admin` (login required) that
+> creates/edits/deletes weddings and uploads media straight to R2 via
+> presigned URLs. The manual workflow below still works and is kept as a
+> fallback. The admin upload path requires `R2_ACCESS_KEY_ID` /
+> `R2_SECRET_ACCESS_KEY` in `.env` (Cloudflare dashboard → R2 → Manage API
+> Tokens → Create API Token with Object Read & Write on the bucket).
+
+This is a manual, dashboard-driven workflow. Media files are uploaded by hand
+to R2, and their public URLs are pasted directly into the wedding document in
+MongoDB.
 
 ## 1. Create the bucket
 
