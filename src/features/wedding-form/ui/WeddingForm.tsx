@@ -162,6 +162,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     }
 
     toast.success("Changes saved.");
+    router.push("/admin");
   }
 
   return (
