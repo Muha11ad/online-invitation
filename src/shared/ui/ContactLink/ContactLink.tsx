@@ -3,8 +3,7 @@ import Image from "next/image";
 import { MEDIA_LINKS } from "@/shared/lib/mediaLinks";
 import { cn } from "@/shared/lib/utils";
 
-// TODO: replace with the actual Telegram handle
-const TELEGRAM_URL = "https://t.me/";
+const TELEGRAM_URL = process.env.TELEGRAM_URL;
 
 export function ContactLink(params: ContactLinkParams): React.JSX.Element {
   const { className } = params;
