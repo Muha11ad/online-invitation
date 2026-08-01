@@ -76,14 +76,18 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
           </div>
 
           <h1
-            className="reveal mt-[10px] font-script text-[#fbf7ef]"
+            className="reveal mt-[10px] flex flex-col items-center gap-x-[0.25em] font-script text-[#fbf7ef] sm:flex-row sm:flex-wrap sm:justify-center"
             style={{
               fontSize: "clamp(60px,9.5vw,132px)",
               lineHeight: 1.02,
               textShadow: "0 2px 22px rgba(45,43,37,.35)",
             }}
           >
-            {husbandName} &amp; {wifeName}
+            <span>{husbandName}</span>
+            <span aria-hidden="true" className="text-[0.62em] leading-none opacity-90">
+              &amp;
+            </span>
+            <span>{wifeName}</span>
           </h1>
 
           <p className="reveal font-typewriter text-[12px] leading-[2.2] tracking-[0.34em] text-[#e8ddca] uppercase">
@@ -97,7 +101,7 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
       {/* OUR FOREVER BEGINS */}
       <section aria-label="Welcome message" className="bg-greige px-6 py-[clamp(84px,11vw,148px)]">
         <div className="mx-auto flex max-w-[820px] flex-col items-center text-center">
-          <div className="reveal mb-[clamp(56px,8vw,96px)] flex items-center justify-center gap-[14px]">
+          <div className="reveal mb-[clamp(56px,8vw,96px)] flex flex-col items-center justify-center gap-[4px] sm:flex-row sm:gap-[14px]">
             <span
               className="font-display font-normal tracking-[0.16em] text-gold uppercase"
               style={{ fontSize: "clamp(26px,3.4vw,42px)" }}
@@ -105,7 +109,7 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
               {dict.thirdTemplate.forever}
             </span>
             <span
-              className="-ml-[6px] font-script text-gold"
+              className="font-script text-gold sm:-ml-[6px]"
               style={{ fontSize: "clamp(56px,8vw,104px)", lineHeight: 0.9 }}
             >
               {dict.thirdTemplate.begins}
