@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import { sanitizeRedirect } from "@/shared/lib/redirects";
 
 export function LoginForm(params: LoginFormParams): React.JSX.Element {
   const { expired, redirectTo } = params;
-  const router = useRouter();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,16 +17,35 @@ export function LoginForm(params: LoginFormParams): React.JSX.Element {
     setLoading(true);
     setError(null);
 
-    const ok = await login(username, password);
+    let navigating = false;
 
-    if (ok) {
-      router.push(sanitizeRedirect(redirectTo));
-      return;
+    try {
+      const result = await login(username, password);
+
+      if (result.ok) {
+        navigating = true;
+        // Hard navigation, not router.push: the unauthenticated prefetch of
+        // "/admin" left a stale redirect-to-login entry in the client Router
+        // Cache. Only a full document load re-runs the proxy with the fresh
+        // session cookie.
+        window.location.assign(sanitizeRedirect(redirectTo, window.location.origin));
+        return;
+      }
+
+      if (result.status === 429) {
+        setError("Too many attempts. Please try again later.");
+        return;
+      }
+
+      setPassword("");
+      setError("Invalid username or password.");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      if (!navigating) {
+        setLoading(false);
+      }
     }
-
-    setPassword("");
-    setError("Invalid username or password.");
-    setLoading(false);
   }
 
   return (
@@ -87,24 +106,19 @@ export function LoginForm(params: LoginFormParams): React.JSX.Element {
   );
 }
 
-// Only follow same-origin, path-relative redirects. A value starting with
-// "//" is protocol-relative and would send the browser off-site, so it must
-// be rejected along with any absolute URL.
-function sanitizeRedirect(redirectTo: string | undefined): string {
-  if (redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")) {
-    return redirectTo;
-  }
-  return "/admin";
-}
-
-async function login(username: string, password: string): Promise<boolean> {
+async function login(username: string, password: string): Promise<LoginResult> {
   const response = await fetch("/api/admin/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
 
-  return response.ok;
+  return { ok: response.ok, status: response.status };
+}
+
+interface LoginResult {
+  ok: boolean;
+  status: number;
 }
 
 interface LoginFormParams {
