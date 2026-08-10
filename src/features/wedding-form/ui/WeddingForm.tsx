@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import type { LocalizedString, RawWeddingDoc, WeddingInputValue } from "@/entities/wedding";
 
+import { applyTemplatePrefix, buildAutoSlug, SLUG_PATTERN } from "@/shared/lib/slug";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -16,7 +17,6 @@ import { TemplateType } from "@/shared/types/templates";
 import { ddmmyyyyToInputDate, inputDateToDdmmyyyy } from "../lib/date";
 import { guestsToText, parseGuestsInput } from "../lib/guests";
 import { emptyLocalizedString } from "../lib/localizedString";
-import { SLUG_PATTERN, buildAutoSlug } from "../lib/slug";
 import { LocalizedInput } from "./LocalizedInput";
 import { MediaUploadSlot } from "./MediaUploadSlot";
 
@@ -62,14 +62,29 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   const [music, setMusic] = useState(initialValue?.music);
   const [coupleMainImage, setCoupleMainImage] = useState(initialValue?.coupleMainImage);
   const [manualSlug, setManualSlug] = useState(initialValue?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(mode === "edit");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [slugServerError, setSlugServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // In edit mode the slug is not typed but derived: the template is part of it,
+  // so switching template previews the slug the PATCH will regenerate. An
+  // untouched template keeps the stored slug verbatim, matching the server rule
+  // — otherwise invitations created before the template prefix existed would
+  // preview a rename that never happens.
   const slug =
-    mode === "create" && !slugTouched ? buildAutoSlug(husband.en, wife.en, ddmmyyyy) : manualSlug;
+    mode === "edit"
+      ? template === initialValue!.template
+        ? initialValue!.slug
+        : applyTemplatePrefix(initialValue!.slug, template)
+      : slugTouched
+        ? manualSlug
+        : buildAutoSlug(template, husband.en, wife.en, ddmmyyyy);
+
+  const slugWillChange = mode === "edit" && slug !== initialValue!.slug;
 
   const guestsCount = parseGuestsInput(guestsText)?.length ?? 0;
+  // Uploads keep landing under the current slug — the PATCH moves the whole
+  // prefix afterwards if the template change renames it.
   const mediaSlug = mode === "edit" ? initialValue!.slug : slug;
 
   const dateValid = ddmmyyyy.trim().length > 0 && time.trim().length > 0;
@@ -77,7 +92,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   const lonValid = lon.trim().length > 0 && !Number.isNaN(Number(lon));
   const slugPatternError =
     mode === "create" && slug.length > 0 && !SLUG_PATTERN.test(slug)
-      ? "Slug can only contain lowercase letters, numbers, and hyphens."
+      ? "Slug can only contain lowercase letters, numbers, hyphens, and underscores."
       : null;
   const slugError = slugServerError ?? slugPatternError;
   const slugValid = mode === "edit" || (slug.trim().length > 0 && SLUG_PATTERN.test(slug));
@@ -87,6 +102,17 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   function handleSlugChange(value: string): void {
     setSlugTouched(true);
     setManualSlug(value);
+    setSlugServerError(null);
+  }
+
+  // Picking a different template rewrites the derived slug, so a "taken"
+  // verdict from the server no longer applies to what is on screen.
+  function handleTemplateChange(value: RawWeddingDoc["template"] | null): void {
+    if (value === null) {
+      return;
+    }
+
+    setTemplate(value);
     setSlugServerError(null);
   }
 
@@ -137,7 +163,10 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     });
 
     if (response.status === 409) {
-      setSlugServerError("This URL is already taken.");
+      // Also covers a URL another invitation used before a template change
+      // retired it: those stay reserved so old guest links keep resolving to
+      // the invitation that owned them.
+      setSlugServerError("This URL is already taken or reserved. Edit it to continue.");
       slugInputRef.current?.focus();
       return;
     }
@@ -158,12 +187,17 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       body: JSON.stringify(buildPatch()),
     });
 
+    if (response.status === 409) {
+      toast.error("Another invitation already uses the URL this template would generate.");
+      return;
+    }
+
     if (!response.ok) {
       toast.error("Failed to save changes.");
       return;
     }
 
-    toast.success("Changes saved.");
+    toast.success(slugWillChange ? "Changes saved. The invitation URL changed." : "Changes saved.");
     router.push("/admin");
   }
 
@@ -172,10 +206,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="template">Template</Label>
-          <Select
-            value={template}
-            onValueChange={(value) => setTemplate(value as RawWeddingDoc["template"])}
-          >
+          <Select value={template} onValueChange={handleTemplateChange}>
             <SelectTrigger id="template" className="w-full sm:w-64">
               <SelectValue />
             </SelectTrigger>
@@ -298,7 +329,16 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
           aria-invalid={slugError ? true : undefined}
         />
         {mode === "edit" ? (
-          <p className="text-sm text-muted-foreground">Slug cannot be changed after creation</p>
+          slugWillChange ? (
+            <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              Changing the template regenerates this URL. Links already sent to guests (/event/
+              {initialValue!.slug}) will keep working.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              The slug follows the template and cannot be edited directly
+            </p>
+          )
         ) : slugError ? (
           <p className="text-sm text-destructive">{slugError}</p>
         ) : (

@@ -1,14 +1,15 @@
-import type { Collection, UpdateFilter, WithId } from "mongodb";
+import type { Collection, Filter, ObjectId, UpdateFilter, WithId } from "mongodb";
 
 import clientPromise from "@/shared/lib/mongodb";
 
 import type { RawWeddingDoc } from "./model";
 
 export async function getWeddingBySlug(slug: string): Promise<RawWeddingDoc | null> {
-  const client = await clientPromise;
-  const db = client.db(process.env.MONGODB_DB_NAME);
+  const collection = await getWeddingsCollection();
 
-  return db.collection<RawWeddingDoc>(process.env.MONGODB_COLLECTION_WEDDINGS!).findOne({ slug });
+  // Retired slugs resolve too, so an invitation link already sent to guests
+  // keeps working after a template change regenerated the slug.
+  return collection.findOne({ $or: [{ slug }, { previousSlugs: slug }] });
 }
 
 export async function listWeddings(): Promise<WeddingListItem[]> {
@@ -19,9 +20,19 @@ export async function listWeddings(): Promise<WeddingListItem[]> {
     .toArray() as Promise<WeddingListItem[]>;
 }
 
-export async function slugExists(slug: string): Promise<boolean> {
+// `excludeId` skips one document, so an invitation reclaiming a slug it
+// retired earlier (switching a template back) does not collide with itself.
+export async function slugExists(slug: string, excludeId?: ObjectId): Promise<boolean> {
   const collection = await getWeddingsCollection();
-  const count = await collection.countDocuments({ slug }, { limit: 1 });
+
+  // Retired slugs count as taken — reusing one would hijack links that still
+  // point at the invitation that gave it up.
+  const filter: Filter<RawWeddingDoc> = { $or: [{ slug }, { previousSlugs: slug }] };
+  if (excludeId) {
+    filter._id = { $ne: excludeId };
+  }
+
+  const count = await collection.countDocuments(filter, { limit: 1 });
   return count > 0;
 }
 
@@ -32,26 +43,36 @@ export async function createWedding(doc: Omit<RawWeddingDoc, "_id">): Promise<vo
 
 export async function updateWeddingBySlug(
   slug: string,
-  patch: Partial<Omit<RawWeddingDoc, "_id" | "slug">>,
+  patch: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>,
   unsetFields: ReadonlyArray<keyof RawWeddingDoc> = [],
-): Promise<void> {
+  rename?: SlugRename,
+): Promise<boolean> {
   const collection = await getWeddingsCollection();
-  const update = buildUpdateFilter(patch, unsetFields);
+  const update = buildUpdateFilter(patch, unsetFields, rename);
   if (Object.keys(update).length === 0) {
-    return;
+    return true;
   }
 
-  await collection.updateOne({ slug }, update);
+  // Reported back so a caller that already moved storage around can tell
+  // whether the document it was renaming is still there.
+  const result = await collection.updateOne({ slug }, update);
+  return result.matchedCount > 0;
 }
 
 function buildUpdateFilter(
-  patch: Partial<Omit<RawWeddingDoc, "_id" | "slug">>,
+  patch: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>,
   unsetFields: ReadonlyArray<keyof RawWeddingDoc>,
+  rename: SlugRename | undefined,
 ): UpdateFilter<RawWeddingDoc> {
   const update: UpdateFilter<RawWeddingDoc> = {};
 
-  if (Object.keys(patch).length > 0) {
-    update.$set = patch;
+  // The new slug and the retired-slug list land in the same write as the rest
+  // of the patch, so the invitation is never briefly unreachable at either
+  // address.
+  if (Object.keys(patch).length > 0 || rename) {
+    update.$set = rename
+      ? { ...patch, slug: rename.newSlug, previousSlugs: rename.previousSlugs }
+      : patch;
   }
 
   if (unsetFields.length > 0) {
@@ -70,6 +91,12 @@ async function getWeddingsCollection(): Promise<Collection<RawWeddingDoc>> {
   const client = await clientPromise;
   const db = client.db(process.env.MONGODB_DB_NAME);
   return db.collection<RawWeddingDoc>(process.env.MONGODB_COLLECTION_WEDDINGS!);
+}
+
+export interface SlugRename {
+  newSlug: string;
+  // The full replacement history, built by `retireSlug`.
+  previousSlugs: string[];
 }
 
 export type WeddingListItem = WithId<

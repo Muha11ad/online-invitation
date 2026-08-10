@@ -29,6 +29,9 @@ export interface RawWeddingDoc {
   guests?: string[];
   coupleMainImage?: string;
   slug: string;
+  // Slugs this invitation used to be reachable at, kept so links already sent
+  // to guests keep resolving after a template change regenerates the slug.
+  previousSlugs?: string[];
   template: TemplateType;
 }
 

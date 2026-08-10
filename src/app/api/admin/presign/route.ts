@@ -4,8 +4,7 @@ import { NextResponse } from "next/server";
 
 import { isAdminAuthenticated } from "@/shared/lib/adminAuth";
 import { presignPutUrl } from "@/shared/lib/r2";
-
-const SLUG_PATTERN = /^[a-z0-9-_]+$/;
+import { SLUG_PATTERN } from "@/shared/lib/slug";
 
 const MEDIA_KINDS = ["images", "audios", "videos"] as const;
 type MediaKind = (typeof MEDIA_KINDS)[number];
