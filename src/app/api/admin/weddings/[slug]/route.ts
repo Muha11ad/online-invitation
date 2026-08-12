@@ -149,10 +149,7 @@ export async function DELETE(request: Request, { params }: RouteParams): Promise
 
 // `template` is optional because a PATCH need not touch it — `setFields.template`
 // is `TemplateType | undefined`, and the type has to admit that.
-function resolveRenamedSlug(
-  existing: RawWeddingDoc,
-  template: RawWeddingDoc["template"] | undefined,
-): string | undefined {
+function resolveRenamedSlug(existing: RawWeddingDoc, template: RawWeddingDoc["template"] | undefined ): string | undefined {
   if (!template || template === existing.template) {
     return undefined;
   }
@@ -183,13 +180,6 @@ function retargetMediaUrls(params: RetargetMediaUrlsParams): void {
       setFields[field] = value.replace(oldPrefix, newPrefix);
     }
   }
-}
-
-interface RetargetMediaUrlsParams {
-  existing: RawWeddingDoc;
-  setFields: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
-  unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>;
-  newSlug: string;
 }
 
 // Returns the 401 to send back, or `undefined` when the caller may proceed.
@@ -229,6 +219,13 @@ async function parseJson(request: Request): Promise<unknown> {
   } catch {
     return undefined;
   }
+}
+
+interface RetargetMediaUrlsParams {
+	existing: RawWeddingDoc;
+	setFields: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
+	unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>;
+	newSlug: string;
 }
 
 interface RouteParams {
