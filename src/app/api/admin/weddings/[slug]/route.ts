@@ -16,15 +16,9 @@ import { isAdminAuthenticated } from "@/shared/lib/adminAuth";
 import { copyObjectsByPrefix, deleteObjects, listKeysByPrefix } from "@/shared/lib/r2";
 import { applyTemplatePrefix } from "@/shared/lib/slug";
 
-type MediaUrlField = "music" | "coupleMainImage";
-
-const MEDIA_URL_FIELDS: ReadonlyArray<MediaUrlField> = ["music", "coupleMainImage"];
 
 export async function GET(request: Request, { params }: RouteParams): Promise<NextResponse> {
-  if (!(await isAdminAuthenticated())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+  await checkAdminAuthenticated();
   const { slug } = await params;
   const wedding = await getWeddingBySlug(slug);
   if (!wedding) {
@@ -35,13 +29,11 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Ne
 }
 
 export async function PATCH(request: Request, { params }: RouteParams): Promise<NextResponse> {
-  if (!(await isAdminAuthenticated())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  await checkAdminAuthenticated();
 
   const { slug } = await params;
   const json = await parseJson(request);
-  if (json === undefined) {
+  if (!json) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
@@ -71,7 +63,8 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
   let supersededKeys: string[] = [];
 
   if (newSlug) {
-    if (await slugExists(newSlug, existing._id)) {
+	const isSlugTaken = await slugExists(newSlug, existing._id);
+    if (isSlugTaken) {
       return NextResponse.json({ error: "slug_taken" }, { status: 409 });
     }
 
@@ -87,9 +80,10 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     retargetMediaUrls(existing, setFields, unsetFields, newSlug);
   }
 
-  const rename = newSlug
-    ? { newSlug, previousSlugs: retireSlug(existing.slug, existing.previousSlugs, newSlug) }
-    : undefined;
+  let rename
+   if (newSlug) {
+	 rename = { newSlug, previousSlugs: retireSlug(existing.slug, existing.previousSlugs, newSlug) }
+   }
 
   // Matched on the stored slug: `slug` from the URL may be a retired one.
   const updated = await updateWeddingBySlug(existing.slug, setFields, unsetFields, rename);
@@ -110,46 +104,8 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
   return NextResponse.json({ ok: true, slug: newSlug ?? existing.slug });
 }
 
-function resolveRenamedSlug(
-  existing: RawWeddingDoc,
-  template: RawWeddingDoc["template"] | undefined,
-): string | undefined {
-  if (template === undefined || template === existing.template) {
-    return undefined;
-  }
-
-  const candidate = applyTemplatePrefix(existing.slug, template);
-  return candidate === existing.slug ? undefined : candidate;
-}
-
-// Stored media values are absolute public URLs built from the old slug's key
-// prefix, so they have to follow the objects to their new prefix.
-function retargetMediaUrls(
-  existing: RawWeddingDoc,
-  setFields: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>,
-  unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>,
-  newSlug: string,
-): void {
-  const oldPrefix = `/wedding/${existing.slug}/`;
-  const newPrefix = `/wedding/${newSlug}/`;
-
-  for (const field of MEDIA_URL_FIELDS) {
-    if (unsetFields.includes(field)) {
-      continue;
-    }
-
-    const value = setFields[field] ?? existing[field];
-    if (typeof value === "string" && value.includes(oldPrefix)) {
-      setFields[field] = value.replace(oldPrefix, newPrefix);
-    }
-  }
-}
-
 export async function DELETE(request: Request, { params }: RouteParams): Promise<NextResponse> {
-  if (!(await isAdminAuthenticated())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+  await checkAdminAuthenticated();
   const { slug } = await params;
 
   // Resolved first because `slug` may be a retired one, while the media lives
@@ -168,6 +124,50 @@ export async function DELETE(request: Request, { params }: RouteParams): Promise
 
   await deleteWeddingBySlug(existing.slug);
   return NextResponse.json({ ok: true });
+}
+
+function resolveRenamedSlug(existing: RawWeddingDoc, template: RawWeddingDoc["template"]): string | undefined {
+	if (!template || template === existing.template) {
+		return
+	}
+
+	const candidate = applyTemplatePrefix(existing.slug, template);
+	if(candidate === existing.slug) {
+		return
+	}
+
+	return candidate
+}
+
+// Stored media values are absolute public URLs built from the old slug's key
+// prefix, so they have to follow the objects to their new prefix.
+function retargetMediaUrls(
+	existing: RawWeddingDoc,
+	setFields: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>,
+	unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>,
+	newSlug: string,
+): void {
+	const oldPrefix = `/wedding/${existing.slug}/`;
+	const newPrefix = `/wedding/${newSlug}/`;
+
+	for (const field of MEDIA_URL_FIELDS) {
+		if (unsetFields.includes(field)) {
+			continue;
+		}
+
+		const value = setFields[field] ?? existing[field];
+		if (typeof value === "string" && value.includes(oldPrefix)) {
+			setFields[field] = value.replace(oldPrefix, newPrefix);
+		}
+	}
+}
+
+async function checkAdminAuthenticated(): Promise<NextResponse | undefined> {
+	const isAuthenticated = await isAdminAuthenticated();
+	if (isAuthenticated) {
+		return
+	}
+	return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
 function splitPatchValue(value: WeddingInputValue): {
@@ -199,3 +199,7 @@ async function parseJson(request: Request): Promise<unknown> {
 interface RouteParams {
   params: Promise<{ slug: string }>;
 }
+
+type MediaUrlField = "music" | "coupleMainImage";
+
+const MEDIA_URL_FIELDS: ReadonlyArray<MediaUrlField> = ["music", "coupleMainImage"];
