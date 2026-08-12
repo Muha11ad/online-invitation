@@ -20,34 +20,65 @@ describe("slugify", () => {
 
 describe("buildAutoSlug", () => {
   it("prefixes the template and joins the couple with -and-", () => {
-    expect(buildAutoSlug(TemplateType.THIRD, "A", "B", "07-07-2027")).toBe(
-      "third_a-and-b_07-07-2027",
-    );
+    expect(
+      buildAutoSlug({
+        template: TemplateType.THIRD,
+        husbandEn: "A",
+        wifeEn: "B",
+        ddmmyyyy: "07-07-2027",
+      }),
+    ).toBe("third_a-and-b_07-07-2027");
   });
 
   it("keeps the same couple and date unique across templates", () => {
-    const first = buildAutoSlug(TemplateType.FIRST, "Ali", "Madina", "12-09-2026");
-    const third = buildAutoSlug(TemplateType.THIRD, "Ali", "Madina", "12-09-2026");
+    const couple = { husbandEn: "Ali", wifeEn: "Madina", ddmmyyyy: "12-09-2026" };
 
-    expect(first).not.toBe(third);
+    expect(buildAutoSlug({ template: TemplateType.FIRST, ...couple })).not.toBe(
+      buildAutoSlug({ template: TemplateType.THIRD, ...couple }),
+    );
   });
 
   it("omits empty parts instead of leaving dangling separators", () => {
-    expect(buildAutoSlug(TemplateType.FIRST, "Ali", "", "12-09-2026")).toBe("first_ali_12-09-2026");
-    expect(buildAutoSlug(TemplateType.FIRST, "Ali", "Madina", "")).toBe("first_ali-and-madina");
+    expect(
+      buildAutoSlug({
+        template: TemplateType.FIRST,
+        husbandEn: "Ali",
+        wifeEn: "",
+        ddmmyyyy: "12-09-2026",
+      }),
+    ).toBe("first_ali_12-09-2026");
+
+    expect(
+      buildAutoSlug({
+        template: TemplateType.FIRST,
+        husbandEn: "Ali",
+        wifeEn: "Madina",
+        ddmmyyyy: "",
+      }),
+    ).toBe("first_ali-and-madina");
   });
 
   it("stays empty while the couple and date are blank", () => {
     // Media upload slots treat an empty slug as "no invitation yet" and stay
     // disabled, so the template alone must not produce one.
-    expect(buildAutoSlug(TemplateType.FIRST, "", "", "")).toBe("");
-    expect(buildAutoSlug(TemplateType.FIRST, "!!!", "  ", "")).toBe("");
+    expect(
+      buildAutoSlug({ template: TemplateType.FIRST, husbandEn: "", wifeEn: "", ddmmyyyy: "" }),
+    ).toBe("");
+
+    expect(
+      buildAutoSlug({ template: TemplateType.FIRST, husbandEn: "!!!", wifeEn: "  ", ddmmyyyy: "" }),
+    ).toBe("");
   });
 
   it("produces a slug the API pattern accepts", () => {
-    expect(
-      SLUG_PATTERN.test(buildAutoSlug(TemplateType.SECOND, "Ali", "Madina", "12-09-2026")),
-    ).toBe(true);
+    const slug = buildAutoSlug({
+      template: TemplateType.SECOND,
+      husbandEn: "Ali",
+      wifeEn: "Madina",
+      ddmmyyyy: "12-09-2026",
+    });
+
+    expect(SLUG_PATTERN.test(slug)).toBe(true);
   });
 });
 

@@ -41,14 +41,11 @@ export async function createWedding(doc: Omit<RawWeddingDoc, "_id">): Promise<vo
   await collection.insertOne(doc as RawWeddingDoc);
 }
 
-export async function updateWeddingBySlug(
-  slug: string,
-  patch: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>,
-  unsetFields: ReadonlyArray<keyof RawWeddingDoc> = [],
-  rename?: SlugRename,
-): Promise<boolean> {
+export async function updateWeddingBySlug(params: UpdateWeddingBySlugParams): Promise<boolean> {
+  const { slug } = params;
+
   const collection = await getWeddingsCollection();
-  const update = buildUpdateFilter(patch, unsetFields, rename);
+  const update = buildUpdateFilter(params);
   if (Object.keys(update).length === 0) {
     return true;
   }
@@ -59,11 +56,9 @@ export async function updateWeddingBySlug(
   return result.matchedCount > 0;
 }
 
-function buildUpdateFilter(
-  patch: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>,
-  unsetFields: ReadonlyArray<keyof RawWeddingDoc>,
-  rename: SlugRename | undefined,
-): UpdateFilter<RawWeddingDoc> {
+function buildUpdateFilter(params: UpdateWeddingBySlugParams): UpdateFilter<RawWeddingDoc> {
+  const { patch, unsetFields = [], rename } = params;
+
   const update: UpdateFilter<RawWeddingDoc> = {};
 
   // The new slug and the retired-slug list land in the same write as the rest
@@ -91,6 +86,15 @@ async function getWeddingsCollection(): Promise<Collection<RawWeddingDoc>> {
   const client = await clientPromise;
   const db = client.db(process.env.MONGODB_DB_NAME);
   return db.collection<RawWeddingDoc>(process.env.MONGODB_COLLECTION_WEDDINGS!);
+}
+
+export interface UpdateWeddingBySlugParams {
+  // The stored slug to match on — not necessarily the one the caller was given,
+  // which may be retired.
+  slug: string;
+  patch: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
+  unsetFields?: ReadonlyArray<keyof RawWeddingDoc>;
+  rename?: SlugRename;
 }
 
 export interface SlugRename {

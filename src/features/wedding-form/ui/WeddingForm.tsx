@@ -78,7 +78,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
         : applyTemplatePrefix(initialValue!.slug, template)
       : slugTouched
         ? manualSlug
-        : buildAutoSlug(template, husband.en, wife.en, ddmmyyyy);
+        : buildAutoSlug({ template, husbandEn: husband.en, wifeEn: wife.en, ddmmyyyy });
 
   const slugWillChange = mode === "edit" && slug !== initialValue!.slug;
 

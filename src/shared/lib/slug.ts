@@ -18,12 +18,9 @@ export function slugify(value: string): string {
 // The template belongs in the slug because it is what makes it unique: the
 // same couple on the same date can have one invitation per template, and
 // without the prefix the second one collides on the unique-slug check.
-export function buildAutoSlug(
-  template: TemplateType,
-  husbandEn: string,
-  wifeEn: string,
-  ddmmyyyy: string,
-): string {
+export function buildAutoSlug(params: BuildAutoSlugParams): string {
+  const { template, husbandEn, wifeEn, ddmmyyyy } = params;
+
   const couple = [slugify(husbandEn), slugify(wifeEn)].filter(Boolean).join("-and-");
   const identity = [couple, ddmmyyyy].filter(Boolean);
 
@@ -35,6 +32,13 @@ export function buildAutoSlug(
   }
 
   return [template, ...identity].join(SEGMENT_SEPARATOR);
+}
+
+export interface BuildAutoSlugParams {
+  template: TemplateType;
+  husbandEn: string;
+  wifeEn: string;
+  ddmmyyyy: string;
 }
 
 // Swaps the template segment of an existing slug, keeping the rest intact so a
