@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { getWeddingBySlug } from "@/entities/wedding";
 
+import { toWeddingFormValue } from "@/features/wedding-form/lib/formState";
 import { WeddingForm } from "@/features/wedding-form/ui/WeddingForm";
 
 export default async function AdminEditPage({ params }: PageProps): Promise<React.JSX.Element> {
@@ -15,7 +16,7 @@ export default async function AdminEditPage({ params }: PageProps): Promise<Reac
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-semibold text-foreground">Edit Invitation</h1>
-      <WeddingForm mode="edit" initialValue={wedding} />
+      <WeddingForm mode="edit" initialValue={toWeddingFormValue(wedding)} />
     </div>
   );
 }

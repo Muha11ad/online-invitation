@@ -7,6 +7,29 @@ import { emptyLocalizedString } from "./localizedString";
 
 export type WeddingFormMode = "create" | "edit";
 
+// The stored invitation minus `_id`. A Mongo ObjectId is a class instance with
+// a toJSON method, and React refuses to serialise those across the server →
+// client component boundary, so the form is handed a plain object instead.
+export type WeddingFormValue = Omit<RawWeddingDoc, "_id">;
+
+// Listed field by field rather than spread-minus-_id: this is a serialisation
+// boundary, so anything new on the document has to be named here before it can
+// cross it.
+export function toWeddingFormValue(doc: RawWeddingDoc): WeddingFormValue {
+  return {
+    slug: doc.slug,
+    previousSlugs: doc.previousSlugs,
+    template: doc.template,
+    names: doc.names,
+    date: doc.date,
+    location: doc.location,
+    message: doc.message,
+    guests: doc.guests,
+    music: doc.music,
+    coupleMainImage: doc.coupleMainImage,
+  };
+}
+
 export interface WeddingFormInitialState {
   template: RawWeddingDoc["template"];
   husband: LocalizedString;
@@ -29,7 +52,7 @@ export interface WeddingFormInitialState {
 // the component reads `initial.city` instead of unpacking the stored document
 // and its fallback inline, sixteen times over.
 export function getInitialFormState(
-  storedValue: RawWeddingDoc | undefined,
+  storedValue: WeddingFormValue | undefined,
 ): WeddingFormInitialState {
   if (!storedValue) {
     return getBlankFormState();

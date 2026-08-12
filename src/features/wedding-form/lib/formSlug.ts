@@ -1,16 +1,14 @@
-import type { RawWeddingDoc } from "@/entities/wedding";
-
 import { applyTemplatePrefix, buildAutoSlug, SLUG_PATTERN } from "@/shared/lib/slug";
 import type { TemplateType } from "@/shared/types/templates";
 
-import type { WeddingFormMode } from "./formState";
+import type { WeddingFormMode, WeddingFormValue } from "./formState";
 
 export const SLUG_PATTERN_ERROR =
   "Slug can only contain lowercase letters, numbers, hyphens, and underscores.";
 
 export interface GetSlugParams {
   mode: WeddingFormMode;
-  storedValue: RawWeddingDoc | undefined;
+  storedValue: WeddingFormValue | undefined;
   template: TemplateType;
   slugTouched: boolean;
   manualSlug: string;
@@ -41,7 +39,7 @@ export function getSlug(params: GetSlugParams): string {
 }
 
 export interface GetRenamedSlugParams {
-  storedValue: RawWeddingDoc;
+  storedValue: WeddingFormValue;
   template: TemplateType;
 }
 
@@ -58,7 +56,7 @@ export function getRenamedSlug(params: GetRenamedSlugParams): string {
   return applyTemplatePrefix(storedValue.slug, template);
 }
 
-export function willSlugChange(storedValue: RawWeddingDoc | undefined, slug: string): boolean {
+export function willSlugChange(storedValue: WeddingFormValue | undefined, slug: string): boolean {
   if (!storedValue) {
     return false;
   }
@@ -68,7 +66,7 @@ export function willSlugChange(storedValue: RawWeddingDoc | undefined, slug: str
 
 // Uploads keep landing under the stored slug: the PATCH moves the whole prefix
 // afterwards if a template change renames it.
-export function getMediaSlug(storedValue: RawWeddingDoc | undefined, slug: string): string {
+export function getMediaSlug(storedValue: WeddingFormValue | undefined, slug: string): string {
   if (!storedValue) {
     return slug;
   }

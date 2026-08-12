@@ -22,7 +22,7 @@ import {
   willSlugChange,
 } from "../lib/formSlug";
 import { getInitialFormState } from "../lib/formState";
-import type { WeddingFormMode } from "../lib/formState";
+import type { WeddingFormMode, WeddingFormValue } from "../lib/formState";
 import { parseGuestsInput } from "../lib/guests";
 import { LocalizedInput } from "./LocalizedInput";
 import { MediaUploadSlot } from "./MediaUploadSlot";
@@ -168,7 +168,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
 
   // Takes the stored document rather than reaching for `initialValue`, so edit
   // mode never needs a non-null assertion to reach its own slug.
-  async function submitEdit(storedValue: RawWeddingDoc): Promise<void> {
+  async function submitEdit(storedValue: WeddingFormValue): Promise<void> {
     const response = await fetch(`/api/admin/weddings/${storedValue.slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -347,4 +347,4 @@ function getSaveMessage(slugWillChange: boolean): string {
 // always has a stored document, which is what removes the non-null assertions
 // the previous shape needed throughout.
 export type WeddingFormProps =
-  { mode: "create"; initialValue?: undefined } | { mode: "edit"; initialValue: RawWeddingDoc };
+  { mode: "create"; initialValue?: undefined } | { mode: "edit"; initialValue: WeddingFormValue };
