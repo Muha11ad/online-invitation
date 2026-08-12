@@ -77,10 +77,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     }
 
     try {
-      supersededKeys = await copyObjectsByPrefix(
-        `wedding/${existing.slug}/`,
-        `wedding/${newSlug}/`,
-      );
+      supersededKeys = await copyObjectsByPrefix(`wedding/${existing.slug}/`, `wedding/${newSlug}/`);
     } catch {
       return NextResponse.json({ error: "Failed to move media in storage" }, { status: 502 });
     }
@@ -149,7 +146,7 @@ export async function DELETE(request: Request, { params }: RouteParams): Promise
 
 // `template` is optional because a PATCH need not touch it — `setFields.template`
 // is `TemplateType | undefined`, and the type has to admit that.
-function resolveRenamedSlug(existing: RawWeddingDoc, template: RawWeddingDoc["template"] | undefined ): string | undefined {
+function resolveRenamedSlug(existing: RawWeddingDoc, template: RawWeddingDoc["template"] | undefined): string | undefined {
   if (!template || template === existing.template) {
     return undefined;
   }
@@ -222,10 +219,10 @@ async function parseJson(request: Request): Promise<unknown> {
 }
 
 interface RetargetMediaUrlsParams {
-	existing: RawWeddingDoc;
-	setFields: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
-	unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>;
-	newSlug: string;
+  existing: RawWeddingDoc;
+  setFields: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
+  unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>;
+  newSlug: string;
 }
 
 interface RouteParams {
