@@ -14,11 +14,19 @@ import { Textarea } from "@/shared/ui/textarea";
 import { TemplateType } from "@/shared/types/templates";
 
 import { ddmmyyyyToInputDate, inputDateToDdmmyyyy } from "../lib/date";
-import { guestsToText, parseGuestsInput } from "../lib/guests";
-import { emptyLocalizedString } from "../lib/localizedString";
-import { SLUG_PATTERN, buildAutoSlug } from "../lib/slug";
+import {
+  getMediaSlug,
+  getSlug,
+  getSlugPatternError,
+  isSlugValid,
+  willSlugChange,
+} from "../lib/formSlug";
+import { getInitialFormState } from "../lib/formState";
+import type { WeddingFormMode } from "../lib/formState";
+import { parseGuestsInput } from "../lib/guests";
 import { LocalizedInput } from "./LocalizedInput";
 import { MediaUploadSlot } from "./MediaUploadSlot";
+import { SlugField } from "./SlugField";
 
 // Derived from the TemplateType enum so adding a template there is the only
 // change needed to surface it in the picker. Label is the value capitalized.
@@ -32,61 +40,65 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX.Element {
   const router = useRouter();
   const slugInputRef = useRef<HTMLInputElement>(null);
+  const initial = getInitialFormState(initialValue);
 
-  const [template, setTemplate] = useState<RawWeddingDoc["template"]>(
-    initialValue?.template ?? TemplateType.FIRST,
-  );
-  const [husband, setHusband] = useState<LocalizedString>(
-    initialValue?.names.husband ?? emptyLocalizedString(),
-  );
-  const [wife, setWife] = useState<LocalizedString>(
-    initialValue?.names.wife ?? emptyLocalizedString(),
-  );
-  const [ddmmyyyy, setDdmmyyyy] = useState(initialValue?.date.ddmmyyyy ?? "");
-  const [time, setTime] = useState(initialValue?.date.time ?? "");
-  const [city, setCity] = useState<LocalizedString>(
-    initialValue?.location.city ?? emptyLocalizedString(),
-  );
-  const [venue, setVenue] = useState<LocalizedString>(
-    initialValue?.location.venue ?? emptyLocalizedString(),
-  );
-  const [address, setAddress] = useState<LocalizedString>(
-    initialValue?.location.address ?? emptyLocalizedString(),
-  );
-  const [lat, setLat] = useState(initialValue ? String(initialValue.location.coords.lat) : "");
-  const [lon, setLon] = useState(initialValue ? String(initialValue.location.coords.lon) : "");
-  const [message, setMessage] = useState<LocalizedString>(
-    initialValue?.message ?? emptyLocalizedString(),
-  );
-  const [guestsText, setGuestsText] = useState(guestsToText(initialValue?.guests));
-  const [music, setMusic] = useState(initialValue?.music);
-  const [coupleMainImage, setCoupleMainImage] = useState(initialValue?.coupleMainImage);
-  const [manualSlug, setManualSlug] = useState(initialValue?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(mode === "edit");
+  const [template, setTemplate] = useState(initial.template);
+  const [husband, setHusband] = useState<LocalizedString>(initial.husband);
+  const [wife, setWife] = useState<LocalizedString>(initial.wife);
+  const [ddmmyyyy, setDdmmyyyy] = useState(initial.ddmmyyyy);
+  const [time, setTime] = useState(initial.time);
+  const [city, setCity] = useState<LocalizedString>(initial.city);
+  const [venue, setVenue] = useState<LocalizedString>(initial.venue);
+  const [address, setAddress] = useState<LocalizedString>(initial.address);
+  const [lat, setLat] = useState(initial.lat);
+  const [lon, setLon] = useState(initial.lon);
+  const [message, setMessage] = useState<LocalizedString>(initial.message);
+  const [guestsText, setGuestsText] = useState(initial.guestsText);
+  const [music, setMusic] = useState(initial.music);
+  const [coupleMainImage, setCoupleMainImage] = useState(initial.coupleMainImage);
+  const [manualSlug, setManualSlug] = useState(initial.slug);
+  const [slugTouched, setSlugTouched] = useState(false);
   const [slugServerError, setSlugServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const slug =
-    mode === "create" && !slugTouched ? buildAutoSlug(husband.en, wife.en, ddmmyyyy) : manualSlug;
+  const slug = getSlug({
+    mode,
+    storedValue: initialValue,
+    template,
+    slugTouched,
+    manualSlug,
+    husbandEn: husband.en,
+    wifeEn: wife.en,
+    ddmmyyyy,
+  });
 
+  const slugWillChange = willSlugChange(initialValue, slug);
+  const mediaSlug = getMediaSlug(initialValue, slug);
+  const slugError = slugServerError ?? getSlugPatternError(mode, slug);
   const guestsCount = parseGuestsInput(guestsText)?.length ?? 0;
-  const mediaSlug = mode === "edit" ? initialValue!.slug : slug;
+  const submitDisabled = !isFormValid() || submitting;
 
-  const dateValid = ddmmyyyy.trim().length > 0 && time.trim().length > 0;
-  const latValid = lat.trim().length > 0 && !Number.isNaN(Number(lat));
-  const lonValid = lon.trim().length > 0 && !Number.isNaN(Number(lon));
-  const slugPatternError =
-    mode === "create" && slug.length > 0 && !SLUG_PATTERN.test(slug)
-      ? "Slug can only contain lowercase letters, numbers, and hyphens."
-      : null;
-  const slugError = slugServerError ?? slugPatternError;
-  const slugValid = mode === "edit" || (slug.trim().length > 0 && SLUG_PATTERN.test(slug));
+  function isFormValid(): boolean {
+    const dateValid = ddmmyyyy.trim().length > 0 && time.trim().length > 0;
+    const coordsValid = isCoordinate(lat) && isCoordinate(lon);
 
-  const submitDisabled = !dateValid || !latValid || !lonValid || !slugValid || submitting;
+    return dateValid && coordsValid && isSlugValid(mode, slug);
+  }
 
   function handleSlugChange(value: string): void {
     setSlugTouched(true);
     setManualSlug(value);
+    setSlugServerError(null);
+  }
+
+  // Picking a different template rewrites the derived slug, so a "taken"
+  // verdict from the server no longer applies to what is on screen.
+  function handleTemplateChange(value: RawWeddingDoc["template"] | null): void {
+    if (value === null) {
+      return;
+    }
+
+    setTemplate(value);
     setSlugServerError(null);
   }
 
@@ -119,10 +131,10 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     setSubmitting(true);
 
     try {
-      if (mode === "create") {
-        await submitCreate();
+      if (initialValue) {
+        await submitEdit(initialValue);
       } else {
-        await submitEdit();
+        await submitCreate();
       }
     } finally {
       setSubmitting(false);
@@ -137,7 +149,10 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     });
 
     if (response.status === 409) {
-      setSlugServerError("This URL is already taken.");
+      // Also covers a URL another invitation used before a template change
+      // retired it: those stay reserved so old guest links keep resolving to
+      // the invitation that owned them.
+      setSlugServerError("This URL is already taken or reserved. Edit it to continue.");
       slugInputRef.current?.focus();
       return;
     }
@@ -151,19 +166,26 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     router.push("/admin");
   }
 
-  async function submitEdit(): Promise<void> {
-    const response = await fetch(`/api/admin/weddings/${initialValue!.slug}`, {
+  // Takes the stored document rather than reaching for `initialValue`, so edit
+  // mode never needs a non-null assertion to reach its own slug.
+  async function submitEdit(storedValue: RawWeddingDoc): Promise<void> {
+    const response = await fetch(`/api/admin/weddings/${storedValue.slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(buildPatch()),
     });
+
+    if (response.status === 409) {
+      toast.error("Another invitation already uses the URL this template would generate.");
+      return;
+    }
 
     if (!response.ok) {
       toast.error("Failed to save changes.");
       return;
     }
 
-    toast.success("Changes saved.");
+    toast.success(getSaveMessage(slugWillChange));
     router.push("/admin");
   }
 
@@ -172,10 +194,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="template">Template</Label>
-          <Select
-            value={template}
-            onValueChange={(value) => setTemplate(value as RawWeddingDoc["template"])}
-          >
+          <Select value={template} onValueChange={handleTemplateChange}>
             <SelectTrigger id="template" className="w-full sm:w-64">
               <SelectValue />
             </SelectTrigger>
@@ -287,41 +306,45 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
         />
       </section>
 
-      <section className="flex flex-col gap-1.5">
-        <Label htmlFor="slug">Slug</Label>
-        <Input
-          id="slug"
-          ref={slugInputRef}
-          value={slug}
-          readOnly={mode === "edit"}
-          onChange={(event) => handleSlugChange(event.target.value)}
-          aria-invalid={slugError ? true : undefined}
-        />
-        {mode === "edit" ? (
-          <p className="text-sm text-muted-foreground">Slug cannot be changed after creation</p>
-        ) : slugError ? (
-          <p className="text-sm text-destructive">{slugError}</p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Your invitation will be live at /event/{slug}
-          </p>
-        )}
-      </section>
+      <SlugField
+        mode={mode}
+        slug={slug}
+        storedSlug={initial.slug}
+        slugWillChange={slugWillChange}
+        slugError={slugError}
+        inputRef={slugInputRef}
+        onChange={handleSlugChange}
+      />
 
       <Button type="submit" disabled={submitDisabled}>
-        {mode === "create"
-          ? submitting
-            ? "Creating…"
-            : "Create Invitation"
-          : submitting
-            ? "Saving…"
-            : "Save Changes"}
+        {getSubmitLabel(mode, submitting)}
       </Button>
     </form>
   );
 }
 
-interface WeddingFormProps {
-  initialValue?: RawWeddingDoc;
-  mode: "create" | "edit";
+function isCoordinate(value: string): boolean {
+  return value.trim().length > 0 && !Number.isNaN(Number(value));
 }
+
+function getSubmitLabel(mode: WeddingFormMode, submitting: boolean): string {
+  if (mode === "create") {
+    return submitting ? "Creating…" : "Create Invitation";
+  }
+
+  return submitting ? "Saving…" : "Save Changes";
+}
+
+function getSaveMessage(slugWillChange: boolean): string {
+  if (slugWillChange) {
+    return "Changes saved. The invitation URL changed.";
+  }
+
+  return "Changes saved.";
+}
+
+// A discriminated union rather than an optional `initialValue`: edit mode
+// always has a stored document, which is what removes the non-null assertions
+// the previous shape needed throughout.
+export type WeddingFormProps =
+  { mode: "create"; initialValue?: undefined } | { mode: "edit"; initialValue: RawWeddingDoc };

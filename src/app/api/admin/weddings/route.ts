@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
 
-import {
-  createWedding,
-  listWeddings,
-  slugExists,
-  validateWeddingInput,
-  WEDDING_MUTABLE_FIELDS,
-} from "@/entities/wedding";
+import { createWedding, listWeddings, slugExists, validateWeddingInput, WEDDING_MUTABLE_FIELDS } from "@/entities/wedding";
 import type { RawWeddingDoc, WeddingInputValue } from "@/entities/wedding";
 
 import { isAdminAuthenticated } from "@/shared/lib/adminAuth";
+import { SLUG_PATTERN } from "@/shared/lib/slug";
 
-const SLUG_PATTERN = /^[a-z0-9-_]+$/;
 const POST_ALLOWED_KEYS = [...WEDDING_MUTABLE_FIELDS, "slug"] as const;
 
 export async function GET(): Promise<NextResponse> {
