@@ -6,7 +6,11 @@ import type { RawWeddingDoc, WeddingInputValue } from "@/entities/wedding";
 import { isAdminAuthenticated } from "@/shared/lib/adminAuth";
 import { SLUG_PATTERN } from "@/shared/lib/slug";
 
-const POST_ALLOWED_KEYS = [...WEDDING_MUTABLE_FIELDS, "slug"] as const;
+const POST_ALLOWED_KEYS = [...WEDDING_MUTABLE_FIELDS, "slug", "mediaId"] as const;
+
+// Minted by the browser before the document exists, since media can be
+// uploaded while the form is still being filled in.
+const MEDIA_ID_PATTERN = /^[a-z0-9_-]+$/i;
 
 export async function GET(): Promise<NextResponse> {
   if (!(await isAdminAuthenticated())) {
@@ -32,6 +36,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
   }
 
+  if (typeof record.mediaId !== "string" || !MEDIA_ID_PATTERN.test(record.mediaId)) {
+    return NextResponse.json({ error: "Invalid mediaId" }, { status: 400 });
+  }
+
   const validation = validateWeddingInput(json, {
     partial: false,
     allowedKeys: POST_ALLOWED_KEYS,
@@ -44,13 +52,16 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "slug_taken" }, { status: 409 });
   }
 
-  await createWedding(buildCreateDoc(record.slug, validation.value));
+  await createWedding(buildCreateDoc({ slug: record.slug, mediaId: record.mediaId, value: validation.value }));
   return NextResponse.json({ ok: true }, { status: 201 });
 }
 
-function buildCreateDoc(slug: string, value: WeddingInputValue): Omit<RawWeddingDoc, "_id"> {
+function buildCreateDoc(params: BuildCreateDocParams): Omit<RawWeddingDoc, "_id"> {
+  const { slug, mediaId, value } = params;
+
   const doc: Omit<RawWeddingDoc, "_id"> = {
     slug,
+    mediaId,
     template: value.template!,
     names: value.names!,
     date: value.date!,
@@ -71,6 +82,12 @@ function buildCreateDoc(slug: string, value: WeddingInputValue): Omit<RawWedding
   }
 
   return doc;
+}
+
+interface BuildCreateDocParams {
+  slug: string;
+  mediaId: string;
+  value: WeddingInputValue;
 }
 
 async function parseJson(request: Request): Promise<unknown> {

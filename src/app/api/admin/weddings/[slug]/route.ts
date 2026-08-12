@@ -13,7 +13,8 @@ import {
 import type { RawWeddingDoc, SlugRename, WeddingInputValue } from "@/entities/wedding";
 
 import { isAdminAuthenticated } from "@/shared/lib/adminAuth";
-import { copyObjectsByPrefix, deleteObjects, listKeysByPrefix } from "@/shared/lib/r2";
+import { getMediaPrefix } from "@/shared/lib/mediaPrefix";
+import { deleteObjects, listKeysByPrefix } from "@/shared/lib/r2";
 import { buildAutoSlug, isGeneratedSlug } from "@/shared/lib/slug";
 
 export async function GET(request: Request, { params }: RouteParams): Promise<NextResponse> {
@@ -63,11 +64,6 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
   // client, and the old one is retired (not dropped) by updateWeddingBySlug.
   const newSlug = resolveRenamedSlug(existing, setFields);
 
-  // Media is copied to the new prefix before the write and the originals are
-  // deleted only after it lands, so a failure never leaves the document
-  // pointing at keys that no longer exist.
-  let supersededKeys: string[] = [];
-
   let rename: SlugRename | undefined;
 
   if (newSlug) {
@@ -76,13 +72,13 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       return NextResponse.json({ error: "slug_taken" }, { status: 409 });
     }
 
-    try {
-      supersededKeys = await copyObjectsByPrefix(`wedding/${existing.slug}/`, `wedding/${newSlug}/`);
-    } catch {
-      return NextResponse.json({ error: "Failed to move media in storage" }, { status: 502 });
+    // Media is keyed on `mediaId`, not the slug, so a rename moves nothing in
+    // storage. Documents predating media ids have theirs filed under the old
+    // slug: pinning mediaId to it here freezes the prefix where the objects
+    // already are, so the rename still costs no copying.
+    if (!existing.mediaId) {
+      setFields.mediaId = existing.slug;
     }
-
-    retargetMediaUrls({ existing, setFields, unsetFields, newSlug });
 
     rename = {
       newSlug,
@@ -105,16 +101,6 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (supersededKeys.length > 0) {
-    // Best effort: the rename already succeeded, and leftovers at the old
-    // prefix are unreferenced rather than harmful.
-    try {
-      await deleteObjects(supersededKeys);
-    } catch {
-      // Ignored on purpose — see above.
-    }
-  }
-
   return NextResponse.json({ ok: true, slug: newSlug ?? existing.slug });
 }
 
@@ -126,15 +112,15 @@ export async function DELETE(request: Request, { params }: RouteParams): Promise
 
   const { slug } = await params;
 
-  // Resolved first because `slug` may be a retired one, while the media lives
-  // under the current slug's prefix.
+  // Resolved first because `slug` may be a retired one, and because the media
+  // prefix comes from the document rather than the URL.
   const existing = await getWeddingBySlug(slug);
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   try {
-    const keys = await listKeysByPrefix(`wedding/${existing.slug}/`);
+    const keys = await listKeysByPrefix(getMediaPrefix(existing));
     await deleteObjects(keys);
   } catch {
     return NextResponse.json({ error: "Failed to delete media from storage" }, { status: 502 });
@@ -181,26 +167,6 @@ function resolveRenamedSlug(existing: RawWeddingDoc, setFields: PatchFields): st
 
 type PatchFields = Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
 
-// Stored media values are absolute public URLs built from the old slug's key
-// prefix, so they have to follow the objects to their new prefix.
-function retargetMediaUrls(params: RetargetMediaUrlsParams): void {
-  const { existing, setFields, unsetFields, newSlug } = params;
-
-  const oldPrefix = `/wedding/${existing.slug}/`;
-  const newPrefix = `/wedding/${newSlug}/`;
-
-  for (const field of MEDIA_URL_FIELDS) {
-    if (unsetFields.includes(field)) {
-      continue;
-    }
-
-    const value = setFields[field] ?? existing[field];
-    if (typeof value === "string" && value.includes(oldPrefix)) {
-      setFields[field] = value.replace(oldPrefix, newPrefix);
-    }
-  }
-}
-
 // Returns the 401 to send back, or `undefined` when the caller may proceed.
 // Named for what it returns rather than what it checks: a predicate-sounding
 // name invites `await checkAdminAuthenticated()` on its own line, which drops
@@ -240,17 +206,6 @@ async function parseJson(request: Request): Promise<unknown> {
   }
 }
 
-interface RetargetMediaUrlsParams {
-  existing: RawWeddingDoc;
-  setFields: PatchFields;
-  unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>;
-  newSlug: string;
-}
-
 interface RouteParams {
   params: Promise<{ slug: string }>;
 }
-
-type MediaUrlField = "music" | "coupleMainImage";
-
-const MEDIA_URL_FIELDS: ReadonlyArray<MediaUrlField> = ["music", "coupleMainImage"];

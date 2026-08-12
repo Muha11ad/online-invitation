@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import type { LocalizedString, RawWeddingDoc, WeddingInputValue } from "@/entities/wedding";
@@ -14,13 +14,7 @@ import { Textarea } from "@/shared/ui/textarea";
 import { TemplateType } from "@/shared/types/templates";
 
 import { ddmmyyyyToInputDate, inputDateToDdmmyyyy } from "../lib/date";
-import {
-  getMediaSlug,
-  getSlug,
-  getSlugPatternError,
-  isSlugValid,
-  willSlugChange,
-} from "../lib/formSlug";
+import { getSlug, isSlugValid, willSlugChange } from "../lib/formSlug";
 import { getInitialFormState } from "../lib/formState";
 import type { WeddingFormMode, WeddingFormValue } from "../lib/formState";
 import { parseGuestsInput } from "../lib/guests";
@@ -39,7 +33,6 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX.Element {
   const router = useRouter();
-  const slugInputRef = useRef<HTMLInputElement>(null);
   const initial = getInitialFormState(initialValue);
 
   const [template, setTemplate] = useState(initial.template);
@@ -56,25 +49,23 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   const [guestsText, setGuestsText] = useState(initial.guestsText);
   const [music, setMusic] = useState(initial.music);
   const [coupleMainImage, setCoupleMainImage] = useState(initial.coupleMainImage);
-  const [manualSlug, setManualSlug] = useState(initial.slug);
-  const [slugTouched, setSlugTouched] = useState(false);
   const [slugServerError, setSlugServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Fixed for the lifetime of the form: media is filed under this id, so the
+  // slug can be regenerated without moving anything in storage.
+  const [mediaId] = useState(() => initial.mediaId || crypto.randomUUID());
 
   const slug = getSlug({
     mode,
     storedValue: initialValue,
     template,
-    slugTouched,
-    manualSlug,
     husbandEn: husband.en,
     wifeEn: wife.en,
     ddmmyyyy,
   });
 
   const slugWillChange = willSlugChange(initialValue, slug);
-  const mediaSlug = getMediaSlug(initialValue, slug);
-  const slugError = slugServerError ?? getSlugPatternError(mode, slug);
   const guestsCount = parseGuestsInput(guestsText)?.length ?? 0;
   const submitDisabled = !isFormValid() || submitting;
 
@@ -85,14 +76,8 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     return dateValid && coordsValid && isSlugValid(mode, slug);
   }
 
-  function handleSlugChange(value: string): void {
-    setSlugTouched(true);
-    setManualSlug(value);
-    setSlugServerError(null);
-  }
-
-  // Picking a different template rewrites the derived slug, so a "taken"
-  // verdict from the server no longer applies to what is on screen.
+  // Every identifying field rewrites the derived slug, so a "taken" verdict
+  // from the server no longer applies to what is on screen.
   function handleTemplateChange(value: RawWeddingDoc["template"] | null): void {
     if (value === null) {
       return;
@@ -145,15 +130,16 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     const response = await fetch("/api/admin/weddings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...buildPatch(), slug }),
+      body: JSON.stringify({ ...buildPatch(), slug, mediaId }),
     });
 
     if (response.status === 409) {
-      // Also covers a URL another invitation used before a template change
-      // retired it: those stay reserved so old guest links keep resolving to
-      // the invitation that owned them.
-      setSlugServerError("This URL is already taken or reserved. Edit it to continue.");
-      slugInputRef.current?.focus();
+      // The slug cannot be edited by hand, so the way out is to change what it
+      // is built from. Retired URLs count as taken too: they stay reserved so
+      // old guest links keep resolving to the invitation that owned them.
+      setSlugServerError(
+        "An invitation already uses this URL. Change the template, the names or the date.",
+      );
       return;
     }
 
@@ -212,7 +198,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
           <div className="flex flex-col gap-1.5">
             <Label>Couple main image</Label>
             <MediaUploadSlot
-              slug={mediaSlug}
+              mediaId={mediaId}
               kind="images"
               accept="image/*"
               maxBytes={MAX_IMAGE_BYTES}
@@ -297,7 +283,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       <section className="flex flex-col gap-1.5">
         <Label>Music</Label>
         <MediaUploadSlot
-          slug={mediaSlug}
+          mediaId={mediaId}
           kind="audios"
           accept="audio/*"
           maxBytes={MAX_AUDIO_BYTES}
@@ -311,9 +297,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
         slug={slug}
         storedSlug={initial.slug}
         slugWillChange={slugWillChange}
-        slugError={slugError}
-        inputRef={slugInputRef}
-        onChange={handleSlugChange}
+        slugError={slugServerError}
       />
 
       <Button type="submit" disabled={submitDisabled}>

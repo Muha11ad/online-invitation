@@ -30,8 +30,13 @@ export interface RawWeddingDoc {
   coupleMainImage?: string;
   slug: string;
   // Slugs this invitation used to be reachable at, kept so links already sent
-  // to guests keep resolving after a template change regenerates the slug.
+  // to guests keep resolving after the slug is regenerated.
   previousSlugs?: string[];
+  // Stable key prefix for this invitation's media in R2. Assigned once at
+  // creation and never changed, so renaming the slug never has to move stored
+  // objects. Optional only for documents created before it existed — see
+  // getMediaPrefix and todo.md.
+  mediaId?: string;
   template: TemplateType;
 }
 

@@ -1,5 +1,7 @@
 import type { LocalizedString, RawWeddingDoc } from "@/entities/wedding";
 
+import { getMediaId } from "@/shared/lib/mediaPrefix";
+
 import { TemplateType } from "@/shared/types/templates";
 
 import { guestsToText } from "./guests";
@@ -19,6 +21,7 @@ export function toWeddingFormValue(doc: RawWeddingDoc): WeddingFormValue {
   return {
     slug: doc.slug,
     previousSlugs: doc.previousSlugs,
+    mediaId: doc.mediaId,
     template: doc.template,
     names: doc.names,
     date: doc.date,
@@ -46,6 +49,7 @@ export interface WeddingFormInitialState {
   music: string | undefined;
   coupleMainImage: string | undefined;
   slug: string;
+  mediaId: string;
 }
 
 // The single answer to "what does each field start as". Keeping it here means
@@ -74,6 +78,7 @@ export function getInitialFormState(
     music: storedValue.music,
     coupleMainImage: storedValue.coupleMainImage,
     slug: storedValue.slug,
+    mediaId: getMediaId(storedValue),
   };
 }
 
@@ -94,5 +99,8 @@ function getBlankFormState(): WeddingFormInitialState {
     music: undefined,
     coupleMainImage: undefined,
     slug: "",
+    // Left empty on purpose: getInitialFormState runs on every render, so the
+    // id is minted once by the component's lazy state initialiser instead.
+    mediaId: "",
   };
 }

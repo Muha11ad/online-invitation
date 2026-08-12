@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/shared/ui/button";
 
 export function MediaUploadSlot({
-  slug,
+  mediaId,
   kind,
   accept,
   maxBytes,
@@ -17,7 +17,7 @@ export function MediaUploadSlot({
   const inputRef = useRef<HTMLInputElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
-  const disabled = slug.trim().length === 0;
+  const disabled = mediaId.trim().length === 0;
 
   function handlePick(): void {
     inputRef.current?.click();
@@ -43,7 +43,7 @@ export function MediaUploadSlot({
     setTransient({ type: "uploading", progress: 0 });
 
     try {
-      const { uploadUrl, publicUrl } = await requestPresignedUrl(slug, kind, file);
+      const { uploadUrl, publicUrl } = await requestPresignedUrl(mediaId, kind, file);
       await putFile(uploadUrl, file, xhrRef, (progress) => {
         setTransient({ type: "uploading", progress });
       });
@@ -166,7 +166,7 @@ function validateFile(file: File, accept: string, maxBytes: number): string | nu
 }
 
 async function requestPresignedUrl(
-  slug: string,
+  mediaId: string,
   kind: MediaKind,
   file: File,
 ): Promise<{ uploadUrl: string; publicUrl: string }> {
@@ -174,7 +174,7 @@ async function requestPresignedUrl(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      slug,
+      mediaId,
       kind,
       filename: file.name,
       contentType: file.type,
@@ -244,7 +244,7 @@ type TransientState =
   | { type: "error"; file: File };
 
 interface MediaUploadSlotProps {
-  slug: string;
+  mediaId: string;
   kind: MediaKind;
   accept: string;
   maxBytes: number;

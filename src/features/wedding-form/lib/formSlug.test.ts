@@ -2,15 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { TemplateType } from "@/shared/types/templates";
 
+import { getRenamedSlug, getSlug, isSlugValid, willSlugChange } from "./formSlug";
 import type { WeddingFormValue } from "./formState";
-import {
-  getMediaSlug,
-  getRenamedSlug,
-  getSlug,
-  getSlugPatternError,
-  isSlugValid,
-  willSlugChange,
-} from "./formSlug";
 
 function buildStored(overrides: Partial<WeddingFormValue> = {}): WeddingFormValue {
   return {
@@ -29,8 +22,6 @@ const CREATE_BASE = {
   mode: "create" as const,
   storedValue: undefined,
   template: TemplateType.THIRD,
-  slugTouched: false,
-  manualSlug: "",
   husbandEn: "A",
   wifeEn: "B",
   ddmmyyyy: "07-07-2027",
@@ -41,16 +32,14 @@ describe("getSlug — create mode", () => {
     expect(getSlug(CREATE_BASE)).toBe("third_a-and-b_07-07-2027");
   });
 
-  it("follows the template picker until the admin types a slug", () => {
+  it("follows the template picker", () => {
     expect(getSlug({ ...CREATE_BASE, template: TemplateType.FIRST })).toBe(
       "first_a-and-b_07-07-2027",
     );
   });
 
-  it("keeps a hand-typed slug once touched", () => {
-    expect(getSlug({ ...CREATE_BASE, slugTouched: true, manualSlug: "our-big-day" })).toBe(
-      "our-big-day",
-    );
+  it("is empty until the couple or date is filled in", () => {
+    expect(getSlug({ ...CREATE_BASE, husbandEn: "", wifeEn: "", ddmmyyyy: "" })).toBe("");
   });
 });
 
@@ -72,21 +61,13 @@ describe("getSlug — edit mode", () => {
   it("previews the regenerated slug when a name changes", () => {
     expect(getSlug({ ...editBase, wifeEn: "Carla" })).toBe("third_a-and-carla_07-07-2027");
   });
-
-  it("ignores a touched manual slug — edit mode never types the slug", () => {
-    expect(getSlug({ ...editBase, slugTouched: true, manualSlug: "x" })).toBe(
-      "third_a-and-b_07-07-2027",
-    );
-  });
 });
 
 describe("getRenamedSlug", () => {
   it("leaves a hand-written slug alone however the invitation is edited", () => {
-    const storedValue = buildStored({ slug: "our-big-day" });
-
     expect(
       getRenamedSlug({
-        storedValue,
+        storedValue: buildStored({ slug: "our-big-day" }),
         template: TemplateType.FIRST,
         husbandEn: "A",
         wifeEn: "B",
@@ -96,11 +77,9 @@ describe("getRenamedSlug", () => {
   });
 
   it("regenerates a slug created before the template prefix existed", () => {
-    const storedValue = buildStored({ slug: "a-b-07-07-2027", template: TemplateType.FIRST });
-
     expect(
       getRenamedSlug({
-        storedValue,
+        storedValue: buildStored({ slug: "a-b-07-07-2027", template: TemplateType.FIRST }),
         template: TemplateType.FIRST,
         husbandEn: "A",
         wifeEn: "B",
@@ -110,11 +89,9 @@ describe("getRenamedSlug", () => {
   });
 
   it("keeps the stored slug when the couple and date are cleared", () => {
-    const storedValue = buildStored();
-
     expect(
       getRenamedSlug({
-        storedValue,
+        storedValue: buildStored(),
         template: TemplateType.THIRD,
         husbandEn: "",
         wifeEn: "",
@@ -138,36 +115,13 @@ describe("willSlugChange", () => {
   });
 });
 
-describe("getMediaSlug", () => {
-  it("uses the live slug while creating", () => {
-    expect(getMediaSlug(undefined, "third_a")).toBe("third_a");
-  });
-
-  it("stays on the stored slug while editing, even mid-rename", () => {
-    expect(getMediaSlug(buildStored(), "first_a-and-b_07-07-2027")).toBe(
-      "third_a-and-b_07-07-2027",
-    );
-  });
-});
-
-describe("slug validation", () => {
-  it("reports nothing for an empty create-mode slug", () => {
-    expect(getSlugPatternError("create", "")).toBeNull();
+describe("isSlugValid", () => {
+  it("blocks create mode until the couple or date produces a slug", () => {
     expect(isSlugValid("create", "")).toBe(false);
-  });
-
-  it("rejects characters outside the pattern", () => {
-    expect(getSlugPatternError("create", "Ali & Madina")).not.toBeNull();
-    expect(isSlugValid("create", "Ali & Madina")).toBe(false);
-  });
-
-  it("accepts the generated format", () => {
-    expect(getSlugPatternError("create", "third_a-and-b_07-07-2027")).toBeNull();
     expect(isSlugValid("create", "third_a-and-b_07-07-2027")).toBe(true);
   });
 
-  it("never blocks edit mode, where the slug is derived", () => {
-    expect(getSlugPatternError("edit", "Ali & Madina")).toBeNull();
+  it("never blocks edit mode, where the slug always exists", () => {
     expect(isSlugValid("edit", "")).toBe(true);
   });
 });

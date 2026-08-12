@@ -42,37 +42,6 @@ export async function listKeysByPrefix(prefix: string): Promise<string[]> {
   return keys;
 }
 
-// R2 has no rename, so a move is a copy followed by a delete. Only the copy
-// happens here; the originals are returned for the caller to delete once it has
-// committed whatever made the new prefix the canonical one. Failing anywhere in
-// between leaves duplicated objects (harmless) rather than deleted ones.
-export async function copyObjectsByPrefix(oldPrefix: string, newPrefix: string): Promise<string[]> {
-  const oldKeys = await listKeysByPrefix(oldPrefix);
-
-  for (const oldKey of oldKeys) {
-    await copyObject(oldKey, `${newPrefix}${oldKey.slice(oldPrefix.length)}`);
-  }
-
-  return oldKeys;
-}
-
-async function copyObject(sourceKey: string, destinationKey: string): Promise<void> {
-  const response = await getClient().fetch(`${getBucketEndpoint()}/${encodeKey(destinationKey)}`, {
-    method: "PUT",
-    headers: {
-      "x-amz-copy-source": `/${requireEnv("R2_BUCKET_NAME")}/${encodeKey(sourceKey)}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`R2 CopyObject failed: ${response.status} ${await response.text()}`);
-  }
-}
-
-function encodeKey(key: string): string {
-  return key.split("/").map(encodeURIComponent).join("/");
-}
-
 export async function deleteObjects(keys: string[]): Promise<void> {
   for (let i = 0; i < keys.length; i += DELETE_OBJECTS_CHUNK_SIZE) {
     const chunk = keys.slice(i, i + DELETE_OBJECTS_CHUNK_SIZE);
