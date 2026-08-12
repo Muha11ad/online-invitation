@@ -14,7 +14,7 @@ import type { RawWeddingDoc, SlugRename, WeddingInputValue } from "@/entities/we
 
 import { isAdminAuthenticated } from "@/shared/lib/adminAuth";
 import { copyObjectsByPrefix, deleteObjects, listKeysByPrefix } from "@/shared/lib/r2";
-import { applyTemplatePrefix } from "@/shared/lib/slug";
+import { buildAutoSlug, isGeneratedSlug } from "@/shared/lib/slug";
 
 export async function GET(request: Request, { params }: RouteParams): Promise<NextResponse> {
   const unauthorized = await checkAdminAuthenticated();
@@ -58,10 +58,10 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
 
   const { setFields, unsetFields } = splitPatchValue(validation.value);
 
-  // The template is part of the slug, so switching it has to regenerate the
-  // slug. The new one is derived here rather than taken from the client, and
-  // the old one is retired (not dropped) by updateWeddingBySlug.
-  const newSlug = resolveRenamedSlug(existing, setFields.template);
+  // The slug describes the template, couple and date, so editing any of them
+  // regenerates it. The new one is derived here rather than taken from the
+  // client, and the old one is retired (not dropped) by updateWeddingBySlug.
+  const newSlug = resolveRenamedSlug(existing, setFields);
 
   // Media is copied to the new prefix before the write and the originals are
   // deleted only after it lands, so a failure never leaves the document
@@ -144,20 +144,42 @@ export async function DELETE(request: Request, { params }: RouteParams): Promise
   return NextResponse.json({ ok: true });
 }
 
-// `template` is optional because a PATCH need not touch it — `setFields.template`
-// is `TemplateType | undefined`, and the type has to admit that.
-function resolveRenamedSlug(existing: RawWeddingDoc, template: RawWeddingDoc["template"] | undefined): string | undefined {
-  if (!template || template === existing.template) {
+// A generated slug describes the invitation, so it follows any edit to the
+// template, the couple or the date. Every field is optional because a PATCH
+// need not touch it, so each falls back to what is already stored.
+function resolveRenamedSlug(existing: RawWeddingDoc, setFields: PatchFields): string | undefined {
+  const template = setFields.template ?? existing.template;
+  const names = setFields.names ?? existing.names;
+  const date = setFields.date ?? existing.date;
+
+  const wasGenerated = isGeneratedSlug({
+    slug: existing.slug,
+    template: existing.template,
+    husbandEn: existing.names.husband.en,
+    wifeEn: existing.names.wife.en,
+    ddmmyyyy: existing.date.ddmmyyyy,
+  });
+  if (!wasGenerated) {
     return undefined;
   }
 
-  const candidate = applyTemplatePrefix(existing.slug, template);
-  if (candidate === existing.slug) {
+  const candidate = buildAutoSlug({
+    template,
+    husbandEn: names.husband.en,
+    wifeEn: names.wife.en,
+    ddmmyyyy: date.ddmmyyyy,
+  });
+
+  // An empty candidate means the couple and date were cleared; keeping the
+  // stored slug beats renaming the invitation to nothing.
+  if (candidate.length === 0 || candidate === existing.slug) {
     return undefined;
   }
 
   return candidate;
 }
+
+type PatchFields = Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
 
 // Stored media values are absolute public URLs built from the old slug's key
 // prefix, so they have to follow the objects to their new prefix.
@@ -220,7 +242,7 @@ async function parseJson(request: Request): Promise<unknown> {
 
 interface RetargetMediaUrlsParams {
   existing: RawWeddingDoc;
-  setFields: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
+  setFields: PatchFields;
   unsetFields: ReadonlyArray<(typeof NULLABLE_WEDDING_FIELDS)[number]>;
   newSlug: string;
 }

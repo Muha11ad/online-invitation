@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import type { RawWeddingDoc } from "@/entities/wedding";
-
 import { TemplateType } from "@/shared/types/templates";
 
+import type { WeddingFormValue } from "./formState";
 import {
   getMediaSlug,
   getRenamedSlug,
@@ -13,12 +12,17 @@ import {
   willSlugChange,
 } from "./formSlug";
 
-function buildStored(overrides: Partial<RawWeddingDoc> = {}): RawWeddingDoc {
+function buildStored(overrides: Partial<WeddingFormValue> = {}): WeddingFormValue {
   return {
     slug: "third_a-and-b_07-07-2027",
     template: TemplateType.THIRD,
+    names: {
+      husband: { en: "A", ru: "", uz: "", kiril: "" },
+      wife: { en: "B", ru: "", uz: "", kiril: "" },
+    },
+    date: { ddmmyyyy: "07-07-2027", time: "3:30 pm" },
     ...overrides,
-  } as RawWeddingDoc;
+  } as WeddingFormValue;
 }
 
 const CREATE_BASE = {
@@ -51,42 +55,72 @@ describe("getSlug — create mode", () => {
 });
 
 describe("getSlug — edit mode", () => {
-  const storedValue = buildStored();
+  const editBase = { ...CREATE_BASE, mode: "edit" as const, storedValue: buildStored() };
 
-  it("shows the stored slug verbatim while the template is unchanged", () => {
-    expect(
-      getSlug({ ...CREATE_BASE, mode: "edit", storedValue, template: TemplateType.THIRD }),
-    ).toBe("third_a-and-b_07-07-2027");
+  it("shows the stored slug verbatim while nothing identifying changed", () => {
+    expect(getSlug(editBase)).toBe("third_a-and-b_07-07-2027");
   });
 
   it("previews the regenerated slug when the template changes", () => {
-    expect(
-      getSlug({ ...CREATE_BASE, mode: "edit", storedValue, template: TemplateType.FIRST }),
-    ).toBe("first_a-and-b_07-07-2027");
+    expect(getSlug({ ...editBase, template: TemplateType.FIRST })).toBe("first_a-and-b_07-07-2027");
+  });
+
+  it("previews the regenerated slug when the date changes", () => {
+    expect(getSlug({ ...editBase, ddmmyyyy: "08-08-2028" })).toBe("third_a-and-b_08-08-2028");
+  });
+
+  it("previews the regenerated slug when a name changes", () => {
+    expect(getSlug({ ...editBase, wifeEn: "Carla" })).toBe("third_a-and-carla_07-07-2027");
   });
 
   it("ignores a touched manual slug — edit mode never types the slug", () => {
-    expect(
-      getSlug({ ...CREATE_BASE, mode: "edit", storedValue, slugTouched: true, manualSlug: "x" }),
-    ).toBe("third_a-and-b_07-07-2027");
+    expect(getSlug({ ...editBase, slugTouched: true, manualSlug: "x" })).toBe(
+      "third_a-and-b_07-07-2027",
+    );
   });
 });
 
 describe("getRenamedSlug", () => {
-  it("leaves a slug that predates the template prefix alone", () => {
-    // The server only renames on an actual template change, so an unchanged
-    // template must not preview a rename for these.
-    const storedValue = buildStored({ slug: "a-b-07-07-2027", template: TemplateType.FIRST });
+  it("leaves a hand-written slug alone however the invitation is edited", () => {
+    const storedValue = buildStored({ slug: "our-big-day" });
 
-    expect(getRenamedSlug({ storedValue, template: TemplateType.FIRST })).toBe("a-b-07-07-2027");
+    expect(
+      getRenamedSlug({
+        storedValue,
+        template: TemplateType.FIRST,
+        husbandEn: "A",
+        wifeEn: "B",
+        ddmmyyyy: "08-08-2028",
+      }),
+    ).toBe("our-big-day");
   });
 
-  it("prefixes a legacy slug once the template actually changes", () => {
+  it("regenerates a slug created before the template prefix existed", () => {
     const storedValue = buildStored({ slug: "a-b-07-07-2027", template: TemplateType.FIRST });
 
-    expect(getRenamedSlug({ storedValue, template: TemplateType.THIRD })).toBe(
-      "third_a-b-07-07-2027",
-    );
+    expect(
+      getRenamedSlug({
+        storedValue,
+        template: TemplateType.FIRST,
+        husbandEn: "A",
+        wifeEn: "B",
+        ddmmyyyy: "08-08-2028",
+      }),
+    ).toBe("first_a-and-b_08-08-2028");
+  });
+
+  it("keeps the stored slug when the couple and date are cleared", () => {
+    const storedValue = buildStored();
+
+    expect(
+      getRenamedSlug({
+        storedValue,
+        template: TemplateType.THIRD,
+        husbandEn: "",
+        wifeEn: "",
+        ddmmyyyy: "",
+      }),
+    ).toBe("third_a-and-b_07-07-2027");
   });
 });
 

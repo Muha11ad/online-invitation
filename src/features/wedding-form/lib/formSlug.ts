@@ -1,4 +1,4 @@
-import { applyTemplatePrefix, buildAutoSlug, SLUG_PATTERN } from "@/shared/lib/slug";
+import { buildAutoSlug, isGeneratedSlug, SLUG_PATTERN } from "@/shared/lib/slug";
 import type { TemplateType } from "@/shared/types/templates";
 
 import type { WeddingFormMode, WeddingFormValue } from "./formState";
@@ -23,7 +23,13 @@ export function getSlug(params: GetSlugParams): string {
   const { mode, storedValue, template, slugTouched, manualSlug } = params;
 
   if (mode === "edit" && storedValue) {
-    return getRenamedSlug({ storedValue, template });
+    return getRenamedSlug({
+      storedValue,
+      template,
+      husbandEn: params.husbandEn,
+      wifeEn: params.wifeEn,
+      ddmmyyyy: params.ddmmyyyy,
+    });
   }
 
   if (slugTouched) {
@@ -41,19 +47,34 @@ export function getSlug(params: GetSlugParams): string {
 export interface GetRenamedSlugParams {
   storedValue: WeddingFormValue;
   template: TemplateType;
+  husbandEn: string;
+  wifeEn: string;
+  ddmmyyyy: string;
 }
 
-// Mirrors resolveRenamedSlug() in the PATCH route. An untouched template keeps
-// the stored slug verbatim — otherwise invitations created before the template
-// prefix existed would preview a rename the server never performs.
+// Mirrors resolveRenamedSlug() in the PATCH route: a generated slug follows the
+// template, couple and date, while a hand-written one is left alone. The two
+// must agree, or the form previews a rename the server will not perform.
 export function getRenamedSlug(params: GetRenamedSlugParams): string {
-  const { storedValue, template } = params;
+  const { storedValue, template, husbandEn, wifeEn, ddmmyyyy } = params;
 
-  if (template === storedValue.template) {
+  const wasGenerated = isGeneratedSlug({
+    slug: storedValue.slug,
+    template: storedValue.template,
+    husbandEn: storedValue.names.husband.en,
+    wifeEn: storedValue.names.wife.en,
+    ddmmyyyy: storedValue.date.ddmmyyyy,
+  });
+  if (!wasGenerated) {
     return storedValue.slug;
   }
 
-  return applyTemplatePrefix(storedValue.slug, template);
+  const candidate = buildAutoSlug({ template, husbandEn, wifeEn, ddmmyyyy });
+  if (candidate.length === 0) {
+    return storedValue.slug;
+  }
+
+  return candidate;
 }
 
 export function willSlugChange(storedValue: WeddingFormValue | undefined, slug: string): boolean {
