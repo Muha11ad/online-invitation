@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { TemplateType } from "@/shared/types/templates";
 
-import { applyTemplatePrefix, buildAutoSlug, SLUG_PATTERN, slugify } from "./slug";
+import { applyTemplatePrefix, buildAutoSlug, isGeneratedSlug, SLUG_PATTERN, slugify } from "./slug";
 
 describe("slugify", () => {
   it("lowercases and hyphenates", () => {
@@ -79,6 +79,31 @@ describe("buildAutoSlug", () => {
     });
 
     expect(SLUG_PATTERN.test(slug)).toBe(true);
+  });
+});
+
+describe("isGeneratedSlug", () => {
+  const couple = {
+    template: TemplateType.THIRD,
+    husbandEn: "Ali",
+    wifeEn: "Madina",
+    ddmmyyyy: "12-09-2026",
+  };
+
+  it("recognises a slug in the current format", () => {
+    expect(isGeneratedSlug({ slug: "third_ali-and-madina_12-09-2026", ...couple })).toBe(true);
+  });
+
+  it("recognises a slug from before the template prefix existed", () => {
+    expect(isGeneratedSlug({ slug: "ali-madina-12-09-2026", ...couple })).toBe(true);
+  });
+
+  it("does not recognise a hand-written slug", () => {
+    expect(isGeneratedSlug({ slug: "our-big-day", ...couple })).toBe(false);
+  });
+
+  it("does not recognise a slug describing different values", () => {
+    expect(isGeneratedSlug({ slug: "third_ali-and-madina_01-01-2020", ...couple })).toBe(false);
   });
 });
 

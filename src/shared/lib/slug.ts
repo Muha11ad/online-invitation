@@ -41,6 +41,32 @@ export interface BuildAutoSlugParams {
   ddmmyyyy: string;
 }
 
+// True when the slug is one this app generated rather than one an admin typed
+// by hand at creation. Only generated slugs are kept in sync with the couple,
+// date and template — a hand-written slug is a deliberate choice and is left
+// alone however the invitation is edited afterwards.
+export function isGeneratedSlug(params: IsGeneratedSlugParams): boolean {
+  const { slug, template, husbandEn, wifeEn, ddmmyyyy } = params;
+
+  if (slug === buildAutoSlug({ template, husbandEn, wifeEn, ddmmyyyy })) {
+    return true;
+  }
+
+  return slug === buildLegacySlug({ husbandEn, wifeEn, ddmmyyyy });
+}
+
+export interface IsGeneratedSlugParams extends BuildAutoSlugParams {
+  slug: string;
+}
+
+// The pre-template format: "ali-madina-12-09-2026". Recognised so invitations
+// created before the template prefix existed still count as generated.
+function buildLegacySlug(params: Omit<BuildAutoSlugParams, "template">): string {
+  const { husbandEn, wifeEn, ddmmyyyy } = params;
+
+  return [slugify(husbandEn), slugify(wifeEn), ddmmyyyy].filter(Boolean).join("-");
+}
+
 // Swaps the template segment of an existing slug, keeping the rest intact so a
 // hand-written slug survives a template change. Slugs created before the
 // template prefix existed have no such segment and simply get one prepended.

@@ -1,35 +1,31 @@
-import type { RawWeddingDoc } from "@/entities/wedding";
-
-import { applyTemplatePrefix, buildAutoSlug, SLUG_PATTERN } from "@/shared/lib/slug";
+import { buildAutoSlug, isGeneratedSlug } from "@/shared/lib/slug";
 import type { TemplateType } from "@/shared/types/templates";
 
-import type { WeddingFormMode } from "./formState";
-
-export const SLUG_PATTERN_ERROR =
-  "Slug can only contain lowercase letters, numbers, hyphens, and underscores.";
+import type { WeddingFormMode, WeddingFormValue } from "./formState";
 
 export interface GetSlugParams {
   mode: WeddingFormMode;
-  storedValue: RawWeddingDoc | undefined;
+  storedValue: WeddingFormValue | undefined;
   template: TemplateType;
-  slugTouched: boolean;
-  manualSlug: string;
   husbandEn: string;
   wifeEn: string;
   ddmmyyyy: string;
 }
 
-// The slug the form displays. In edit mode it is derived and read-only; in
-// create mode it is generated from the couple until the admin types over it.
+// The slug the form displays. Always derived, never typed: it describes the
+// template, couple and date, and the only way to change it is to change one of
+// those.
 export function getSlug(params: GetSlugParams): string {
-  const { mode, storedValue, template, slugTouched, manualSlug } = params;
+  const { mode, storedValue, template } = params;
 
   if (mode === "edit" && storedValue) {
-    return getRenamedSlug({ storedValue, template });
-  }
-
-  if (slugTouched) {
-    return manualSlug;
+    return getRenamedSlug({
+      storedValue,
+      template,
+      husbandEn: params.husbandEn,
+      wifeEn: params.wifeEn,
+      ddmmyyyy: params.ddmmyyyy,
+    });
   }
 
   return buildAutoSlug({
@@ -41,24 +37,39 @@ export function getSlug(params: GetSlugParams): string {
 }
 
 export interface GetRenamedSlugParams {
-  storedValue: RawWeddingDoc;
+  storedValue: WeddingFormValue;
   template: TemplateType;
+  husbandEn: string;
+  wifeEn: string;
+  ddmmyyyy: string;
 }
 
-// Mirrors resolveRenamedSlug() in the PATCH route. An untouched template keeps
-// the stored slug verbatim — otherwise invitations created before the template
-// prefix existed would preview a rename the server never performs.
+// Mirrors resolveRenamedSlug() in the PATCH route: a generated slug follows the
+// template, couple and date, while a hand-written one is left alone. The two
+// must agree, or the form previews a rename the server will not perform.
 export function getRenamedSlug(params: GetRenamedSlugParams): string {
-  const { storedValue, template } = params;
+  const { storedValue, template, husbandEn, wifeEn, ddmmyyyy } = params;
 
-  if (template === storedValue.template) {
+  const wasGenerated = isGeneratedSlug({
+    slug: storedValue.slug,
+    template: storedValue.template,
+    husbandEn: storedValue.names.husband.en,
+    wifeEn: storedValue.names.wife.en,
+    ddmmyyyy: storedValue.date.ddmmyyyy,
+  });
+  if (!wasGenerated) {
     return storedValue.slug;
   }
 
-  return applyTemplatePrefix(storedValue.slug, template);
+  const candidate = buildAutoSlug({ template, husbandEn, wifeEn, ddmmyyyy });
+  if (candidate.length === 0) {
+    return storedValue.slug;
+  }
+
+  return candidate;
 }
 
-export function willSlugChange(storedValue: RawWeddingDoc | undefined, slug: string): boolean {
+export function willSlugChange(storedValue: WeddingFormValue | undefined, slug: string): boolean {
   if (!storedValue) {
     return false;
   }
@@ -66,32 +77,13 @@ export function willSlugChange(storedValue: RawWeddingDoc | undefined, slug: str
   return slug !== storedValue.slug;
 }
 
-// Uploads keep landing under the stored slug: the PATCH moves the whole prefix
-// afterwards if a template change renames it.
-export function getMediaSlug(storedValue: RawWeddingDoc | undefined, slug: string): string {
-  if (!storedValue) {
-    return slug;
-  }
-
-  return storedValue.slug;
-}
-
-export function getSlugPatternError(mode: WeddingFormMode, slug: string): string | null {
-  if (mode === "edit" || slug.length === 0) {
-    return null;
-  }
-
-  if (SLUG_PATTERN.test(slug)) {
-    return null;
-  }
-
-  return SLUG_PATTERN_ERROR;
-}
-
+// A generated slug always matches the API's pattern, so the only thing left to
+// check is that there is one: create mode has none until the couple or date is
+// filled in.
 export function isSlugValid(mode: WeddingFormMode, slug: string): boolean {
   if (mode === "edit") {
     return true;
   }
 
-  return slug.trim().length > 0 && SLUG_PATTERN.test(slug);
+  return slug.trim().length > 0;
 }
