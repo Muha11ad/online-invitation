@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import type { LocalizedString, WeddingListItem } from "@/entities/wedding";
 
 import { LOCALES } from "@/shared/i18n";
+import { copyToClipboard } from "@/shared/lib/clipboard";
 import { Button } from "@/shared/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
@@ -27,7 +29,6 @@ export function EventsTable({ weddings }: EventsTableProps): React.JSX.Element {
           <TableHead>Couple</TableHead>
           <TableHead>Date</TableHead>
           <TableHead>Template</TableHead>
-          <TableHead>Slug</TableHead>
           <TableHead>Guests</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
@@ -54,7 +55,6 @@ function EventsTableRow({ wedding, onDeleted }: EventsTableRowProps): React.JSX.
       </TableCell>
       <TableCell>{formatTableDate(wedding.date.ddmmyyyy)}</TableCell>
       <TableCell className="capitalize">{wedding.template}</TableCell>
-      <TableCell className="font-mono">{wedding.slug}</TableCell>
       <TableCell>{guestsCount ? guestsCount : "—"}</TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
@@ -71,6 +71,9 @@ function EventsTableRow({ wedding, onDeleted }: EventsTableRowProps): React.JSX.
             }
           >
             View
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void handleCopyLink(wedding.slug)}>
+            Copy link
           </Button>
           <Button
             variant="outline"
@@ -110,6 +113,18 @@ function buildViewHref(slug: string, guests: string[] | undefined): string {
   }
 
   return `/event/${slug}?guest=${encodeURIComponent(guests[0])}`;
+}
+
+// Deliberately without the `?guest=` param that buildViewHref appends: that
+// is an admin-preview convenience, and a link meant for sharing must not
+// carry it.
+async function handleCopyLink(slug: string): Promise<void> {
+  const copied = await copyToClipboard(`${window.location.origin}/event/${slug}`);
+  if (copied) {
+    toast.success("Link copied");
+  } else {
+    toast.error("Couldn't copy the link");
+  }
 }
 
 interface EventsTableProps {

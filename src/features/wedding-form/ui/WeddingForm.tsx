@@ -14,7 +14,6 @@ import { Textarea } from "@/shared/ui/textarea";
 import { TemplateType } from "@/shared/types/templates";
 
 import { ddmmyyyyToInputDate, inputDateToDdmmyyyy } from "../lib/date";
-import { getSlug, isSlugValid, willSlugChange } from "../lib/formSlug";
 import { getInitialFormState } from "../lib/formState";
 import type { WeddingFormMode, WeddingFormValue } from "../lib/formState";
 import { parseGuestsInput } from "../lib/guests";
@@ -49,23 +48,22 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   const [guestsText, setGuestsText] = useState(initial.guestsText);
   const [music, setMusic] = useState(initial.music);
   const [coupleMainImage, setCoupleMainImage] = useState(initial.coupleMainImage);
-  const [slugServerError, setSlugServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Fixed for the lifetime of the form: media is filed under this id, so the
-  // slug can be regenerated without moving anything in storage.
-  const [mediaId] = useState(() => initial.mediaId || crypto.randomUUID());
+  // The single id for the invitation, immutable for its lifetime: it names
+  // the document and, via getMediaPrefix, keys its media in R2. Minted here
+  // because uploads happen before the document exists.
+  //
+  // The lazy initializer runs once per environment — once for the server
+  // render, once more for the client render that hydrates it — so minting
+  // unconditionally would generate two different UUIDs and throw one away.
+  // Skipping the mint on the server (`typeof window === "undefined"`) means
+  // the only real mint happens client-side, which is also the only place
+  // this ever needs to happen: uploads only start after the browser mounts.
+  const [slug] = useState(
+    () => initial.slug || (typeof window === "undefined" ? "" : crypto.randomUUID()),
+  );
 
-  const slug = getSlug({
-    mode,
-    storedValue: initialValue,
-    template,
-    husbandEn: husband.en,
-    wifeEn: wife.en,
-    ddmmyyyy,
-  });
-
-  const slugWillChange = willSlugChange(initialValue, slug);
   const guestsCount = parseGuestsInput(guestsText)?.length ?? 0;
   const submitDisabled = !isFormValid() || submitting;
 
@@ -73,18 +71,15 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     const dateValid = ddmmyyyy.trim().length > 0 && time.trim().length > 0;
     const coordsValid = isCoordinate(lat) && isCoordinate(lon);
 
-    return dateValid && coordsValid && isSlugValid(mode, slug);
+    return dateValid && coordsValid;
   }
 
-  // Every identifying field rewrites the derived slug, so a "taken" verdict
-  // from the server no longer applies to what is on screen.
   function handleTemplateChange(value: RawWeddingDoc["template"] | null): void {
     if (value === null) {
       return;
     }
 
     setTemplate(value);
-    setSlugServerError(null);
   }
 
   function buildPatch(): WeddingInputValue {
@@ -130,18 +125,8 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
     const response = await fetch("/api/admin/weddings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...buildPatch(), slug, mediaId }),
+      body: JSON.stringify({ ...buildPatch(), slug }),
     });
-
-    if (response.status === 409) {
-      // The slug cannot be edited by hand, so the way out is to change what it
-      // is built from. Retired URLs count as taken too: they stay reserved so
-      // old guest links keep resolving to the invitation that owned them.
-      setSlugServerError(
-        "An invitation already uses this URL. Change the template, the names or the date.",
-      );
-      return;
-    }
 
     if (!response.ok) {
       toast.error("Failed to create the invitation.");
@@ -161,17 +146,12 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       body: JSON.stringify(buildPatch()),
     });
 
-    if (response.status === 409) {
-      toast.error("Another invitation already uses the URL this template would generate.");
-      return;
-    }
-
     if (!response.ok) {
       toast.error("Failed to save changes.");
       return;
     }
 
-    toast.success(getSaveMessage(slugWillChange));
+    toast.success("Changes saved.");
     router.push("/admin");
   }
 
@@ -198,7 +178,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
           <div className="flex flex-col gap-1.5">
             <Label>Couple main image</Label>
             <MediaUploadSlot
-              mediaId={mediaId}
+              slug={slug}
               kind="images"
               accept="image/*"
               maxBytes={MAX_IMAGE_BYTES}
@@ -208,6 +188,8 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
           </div>
         )}
       </section>
+
+      <SlugField mode={mode} slug={slug} />
 
       <section className="grid gap-4 sm:grid-cols-2">
         <LocalizedInput label="Husband name" value={husband} onChange={setHusband} />
@@ -283,7 +265,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       <section className="flex flex-col gap-1.5">
         <Label>Music</Label>
         <MediaUploadSlot
-          mediaId={mediaId}
+          slug={slug}
           kind="audios"
           accept="audio/*"
           maxBytes={MAX_AUDIO_BYTES}
@@ -291,14 +273,6 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
           onChange={setMusic}
         />
       </section>
-
-      <SlugField
-        mode={mode}
-        slug={slug}
-        storedSlug={initial.slug}
-        slugWillChange={slugWillChange}
-        slugError={slugServerError}
-      />
 
       <Button type="submit" disabled={submitDisabled}>
         {getSubmitLabel(mode, submitting)}
@@ -317,14 +291,6 @@ function getSubmitLabel(mode: WeddingFormMode, submitting: boolean): string {
   }
 
   return submitting ? "Saving…" : "Save Changes";
-}
-
-function getSaveMessage(slugWillChange: boolean): string {
-  if (slugWillChange) {
-    return "Changes saved. The invitation URL changed.";
-  }
-
-  return "Changes saved.";
 }
 
 // A discriminated union rather than an optional `initialValue`: edit mode

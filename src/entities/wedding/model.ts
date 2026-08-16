@@ -28,15 +28,14 @@ export interface RawWeddingDoc {
   music?: string;
   guests?: string[];
   coupleMainImage?: string;
+  // A client-minted crypto.randomUUID(), assigned once when the create form
+  // mounts and never changed afterwards. It is the single id for the
+  // invitation: it identifies the document and, via getMediaPrefix, keys its
+  // media in R2.
   slug: string;
-  // Slugs this invitation used to be reachable at, kept so links already sent
-  // to guests keep resolving after the slug is regenerated.
+  // Slugs sent to guests before the UUID migration, kept only so those links
+  // keep resolving. No longer written to — the slug never changes now.
   previousSlugs?: string[];
-  // Stable key prefix for this invitation's media in R2. Assigned once at
-  // creation and never changed, so renaming the slug never has to move stored
-  // objects. Optional only for documents created before it existed — see
-  // getMediaPrefix and todo.md.
-  mediaId?: string;
   template: TemplateType;
 }
 

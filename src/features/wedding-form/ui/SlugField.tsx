@@ -1,63 +1,81 @@
 "use client";
 
+import { Copy } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { toast } from "sonner";
+
+import { copyToClipboard } from "@/shared/lib/clipboard";
+import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 
 import type { WeddingFormMode } from "../lib/formState";
 
-// The slug is always derived and never typed: it describes the template, the
-// couple and the date, so the way to change it is to change one of those.
-export function SlugField(props: SlugFieldProps): React.JSX.Element {
-  const { mode, slug, storedSlug, slugWillChange, slugError } = props;
+// The slug is a client-minted UUID, immutable for the invitation's lifetime,
+// so this field has nothing to validate or preview — it only surfaces the
+// shareable URL and a way to copy it.
+export function SlugField({ mode, slug }: SlugFieldProps): React.JSX.Element {
+  // window.location.origin does not exist on the server, so it is read
+  // through useSyncExternalStore: the server snapshot ("") matches the first
+  // client render, and the real origin only appears once React has hydrated.
+  const origin = useSyncExternalStore(subscribeToNothing, getOrigin, getServerOrigin);
+
+  const link = origin ? `${origin}/event/${slug}` : "";
 
   return (
     <section className="flex flex-col gap-1.5">
-      <Label htmlFor="slug">Slug</Label>
-      <Input id="slug" value={slug} readOnly aria-invalid={slugError ? true : undefined} />
-      <SlugHint
-        mode={mode}
-        slug={slug}
-        storedSlug={storedSlug}
-        slugWillChange={slugWillChange}
-        slugError={slugError}
-      />
+      <Label htmlFor="slug">Invitation link</Label>
+      <div className="flex items-center gap-2">
+        <Input id="slug" className="h-8 flex-1" value={link} readOnly />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-8"
+          aria-label="Copy invitation link"
+          onClick={() => void handleCopy(link)}
+        >
+          <Copy />
+        </Button>
+      </div>
+      <p className="text-sm text-muted-foreground">{getHint(mode)}</p>
     </section>
   );
 }
 
-function SlugHint(props: SlugFieldProps): React.JSX.Element {
-  const { mode, slug, storedSlug, slugWillChange, slugError } = props;
+// The origin never changes during the page's lifetime, so there is nothing
+// to subscribe to — only the snapshot getters differ between server and
+// client.
+function subscribeToNothing(): () => void {
+  return () => {};
+}
 
-  if (slugError) {
-    return <p className="text-sm text-destructive">{slugError}</p>;
+function getOrigin(): string {
+  return window.location.origin;
+}
+
+function getServerOrigin(): string {
+  return "";
+}
+
+async function handleCopy(link: string): Promise<void> {
+  const copied = await copyToClipboard(link);
+  if (copied) {
+    toast.success("Link copied");
+  } else {
+    toast.error("Couldn't copy the link");
+  }
+}
+
+function getHint(mode: WeddingFormMode): string {
+  if (mode === "create") {
+    return "This link goes live once you create the invitation.";
   }
 
-  if (mode === "edit") {
-    if (slugWillChange) {
-      return (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          This changes the invitation URL. Links already sent to guests (/event/
-          {storedSlug}) will keep working.
-        </p>
-      );
-    }
-
-    return (
-      <p className="text-sm text-muted-foreground">
-        Built from the template, names and date — edit those to change it
-      </p>
-    );
-  }
-
-  return (
-    <p className="text-sm text-muted-foreground">Your invitation will be live at /event/{slug}</p>
-  );
+  return "Share this link with guests.";
 }
 
 interface SlugFieldProps {
   mode: WeddingFormMode;
   slug: string;
-  storedSlug: string | undefined;
-  slugWillChange: boolean;
-  slugError: string | null;
 }

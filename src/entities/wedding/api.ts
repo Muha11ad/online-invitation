@@ -1,4 +1,4 @@
-import type { Collection, Filter, ObjectId, UpdateFilter, WithId } from "mongodb";
+import type { Collection, Filter, UpdateFilter, WithId } from "mongodb";
 
 import clientPromise from "@/shared/lib/mongodb";
 
@@ -20,17 +20,12 @@ export async function listWeddings(): Promise<WeddingListItem[]> {
     .toArray() as Promise<WeddingListItem[]>;
 }
 
-// `excludeId` skips one document, so an invitation reclaiming a slug it
-// retired earlier (switching a template back) does not collide with itself.
-export async function slugExists(slug: string, excludeId?: ObjectId): Promise<boolean> {
+export async function slugExists(slug: string): Promise<boolean> {
   const collection = await getWeddingsCollection();
 
   // Retired slugs count as taken — reusing one would hijack links that still
   // point at the invitation that gave it up.
   const filter: Filter<RawWeddingDoc> = { $or: [{ slug }, { previousSlugs: slug }] };
-  if (excludeId) {
-    filter._id = { $ne: excludeId };
-  }
 
   const count = await collection.countDocuments(filter, { limit: 1 });
   return count > 0;
@@ -50,24 +45,19 @@ export async function updateWeddingBySlug(params: UpdateWeddingBySlugParams): Pr
     return true;
   }
 
-  // Reported back so a caller that already moved storage around can tell
-  // whether the document it was renaming is still there.
+  // Reported back so a caller can tell whether the document it patched is
+  // still there.
   const result = await collection.updateOne({ slug }, update);
   return result.matchedCount > 0;
 }
 
 function buildUpdateFilter(params: UpdateWeddingBySlugParams): UpdateFilter<RawWeddingDoc> {
-  const { patch, unsetFields = [], rename } = params;
+  const { patch, unsetFields = [] } = params;
 
   const update: UpdateFilter<RawWeddingDoc> = {};
 
-  // The new slug and the retired-slug list land in the same write as the rest
-  // of the patch, so the invitation is never briefly unreachable at either
-  // address.
-  if (Object.keys(patch).length > 0 || rename) {
-    update.$set = rename
-      ? { ...patch, slug: rename.newSlug, previousSlugs: rename.previousSlugs }
-      : patch;
+  if (Object.keys(patch).length > 0) {
+    update.$set = patch;
   }
 
   if (unsetFields.length > 0) {
@@ -94,13 +84,6 @@ export interface UpdateWeddingBySlugParams {
   slug: string;
   patch: Partial<Omit<RawWeddingDoc, "_id" | "slug" | "previousSlugs">>;
   unsetFields?: ReadonlyArray<keyof RawWeddingDoc>;
-  rename?: SlugRename;
-}
-
-export interface SlugRename {
-  newSlug: string;
-  // The full replacement history, built by `retireSlug`.
-  previousSlugs: string[];
 }
 
 export type WeddingListItem = WithId<

@@ -6,8 +6,7 @@ export {
   slugExists,
   updateWeddingBySlug,
 } from "./api";
-export type { SlugRename, WeddingListItem } from "./api";
-export { retireSlug } from "./lib/slugHistory";
+export type { WeddingListItem } from "./api";
 export type { LocalizedString, RawWeddingDoc, WeddingTemplateProps } from "./model";
 export { hasCompleteLocale, pick } from "./lib/localization";
 export {

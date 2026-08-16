@@ -2,28 +2,17 @@
 // deleting the invitation can sweep its media with one list-and-delete and a
 // replaced file never becomes an orphan.
 //
-// The prefix is keyed on `mediaId`, which is assigned at creation and never
-// changes — that is what lets the slug be regenerated without moving a single
-// object in storage.
+// The prefix is keyed on the slug. For any document created by this code,
+// that is safe: the slug is a client-minted id assigned once and never
+// changed. It is only safe for a document migrated from before this change
+// if migration set `slug` to the R2 prefix that document's media already
+// sits under (its former `mediaId`, or its former slug if it never had one)
+// — see todo.md. Call this with anything else and it resolves to a prefix
+// with no objects in it.
 //
-// Deliberately in `shared` with a structural parameter type rather than in the
+// Deliberately in `shared` with a plain string parameter rather than in the
 // wedding entity: the form is a client component, and importing this through
 // the entity's barrel would drag the MongoDB driver into the browser bundle.
-export function getMediaPrefix(reference: MediaPrefixReference): string {
-  return `wedding/${getMediaId(reference)}/`;
-}
-
-// TODO(prod-cleanup): drop the `slug` fallback and make `mediaId` required once
-// every stored document has one. See todo.md.
-export function getMediaId(reference: MediaPrefixReference): string {
-  if (reference.mediaId) {
-    return reference.mediaId;
-  }
-
-  return reference.slug;
-}
-
-export interface MediaPrefixReference {
-  slug: string;
-  mediaId?: string;
+export function getMediaPrefix(slug: string): string {
+  return `wedding/${slug}/`;
 }

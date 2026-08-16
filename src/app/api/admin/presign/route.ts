@@ -4,10 +4,7 @@ import { NextResponse } from "next/server";
 
 import { isAdminAuthenticated } from "@/shared/lib/adminAuth";
 import { presignPutUrl } from "@/shared/lib/r2";
-
-// Accepts a mediaId (a UUID for anything created since media ids existed) and
-// also the slug-shaped prefix that older invitations still use.
-const MEDIA_ID_PATTERN = /^[a-z0-9_-]+$/i;
+import { SLUG_PATTERN } from "@/shared/lib/slug";
 
 const MEDIA_KINDS = ["images", "audios", "videos"] as const;
 type MediaKind = (typeof MEDIA_KINDS)[number];
@@ -39,8 +36,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
-  const { mediaId, kind, filename, contentType } = body;
-  const key = `wedding/${mediaId}/${kind}/${randomUUID()}-${sanitizeFilename(filename)}`;
+  const { slug, kind, filename, contentType } = body;
+  const key = `wedding/${slug}/${kind}/${randomUUID()}-${sanitizeFilename(filename)}`;
 
   const { uploadUrl, publicUrl } = await presignPutUrl({ key, contentType });
 
@@ -48,10 +45,10 @@ export async function POST(request: Request): Promise<NextResponse> {
 }
 
 function validatePresignRequest(body: PresignRequestBody): string | null {
-  const { mediaId, kind, contentType, size } = body;
+  const { slug, kind, contentType, size } = body;
 
-  if (!MEDIA_ID_PATTERN.test(mediaId)) {
-    return "Invalid mediaId";
+  if (!SLUG_PATTERN.test(slug)) {
+    return "Invalid slug";
   }
 
   if (!isMediaKind(kind)) {
@@ -81,7 +78,7 @@ async function parseBody(request: Request): Promise<PresignRequestBody | null> {
   try {
     const json = (await request.json()) as Partial<PresignRequestBody>;
     if (
-      typeof json.mediaId !== "string" ||
+      typeof json.slug !== "string" ||
       typeof json.kind !== "string" ||
       typeof json.filename !== "string" ||
       typeof json.contentType !== "string" ||
@@ -90,7 +87,7 @@ async function parseBody(request: Request): Promise<PresignRequestBody | null> {
       return null;
     }
     return {
-      mediaId: json.mediaId,
+      slug: json.slug,
       kind: json.kind,
       filename: json.filename,
       contentType: json.contentType,
@@ -102,7 +99,7 @@ async function parseBody(request: Request): Promise<PresignRequestBody | null> {
 }
 
 interface PresignRequestBody {
-  mediaId: string;
+  slug: string;
   // Left as `string` until validatePresignRequest narrows it to MediaKind;
   // casting here would defeat the point of validating it below.
   kind: string;

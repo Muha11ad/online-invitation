@@ -49,8 +49,8 @@ export function ConfirmDeleteDialog({
         <DialogHeader>
           <DialogTitle>Delete invitation?</DialogTitle>
           <DialogDescription>
-            This will permanently delete the invitation for {husbandName} & {wifeName} ({slug}).
-            This action cannot be undone and the public link will stop working immediately.
+            This will permanently delete the invitation for {husbandName} & {wifeName}. This action
+            cannot be undone and the public link will stop working immediately.
           </DialogDescription>
         </DialogHeader>
 
