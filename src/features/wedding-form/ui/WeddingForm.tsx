@@ -4,8 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { getAvailableLocales } from "@/entities/wedding/lib/localization";
+import type { LocaleCompletenessInput } from "@/entities/wedding/lib/localization";
 import type { LocalizedString, RawWeddingDoc, WeddingInputValue } from "@/entities/wedding";
 
+import { LOCALES, type Locale } from "@/shared/i18n";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -18,6 +21,7 @@ import { getSlug, isSlugValid, willSlugChange } from "../lib/formSlug";
 import { getInitialFormState } from "../lib/formState";
 import type { WeddingFormMode, WeddingFormValue } from "../lib/formState";
 import { parseGuestsInput } from "../lib/guests";
+import { LocaleToggle } from "./LocaleToggle";
 import { LocalizedInput } from "./LocalizedInput";
 import { MediaUploadSlot } from "./MediaUploadSlot";
 import { SlugField } from "./SlugField";
@@ -36,6 +40,7 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   const initial = getInitialFormState(initialValue);
 
   const [template, setTemplate] = useState(initial.template);
+  const [activeLocale, setActiveLocale] = useState<Locale>(LOCALES[0]);
   const [husband, setHusband] = useState<LocalizedString>(initial.husband);
   const [wife, setWife] = useState<LocalizedString>(initial.wife);
   const [ddmmyyyy, setDdmmyyyy] = useState(initial.ddmmyyyy);
@@ -67,13 +72,24 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
 
   const slugWillChange = willSlugChange(initialValue, slug);
   const guestsCount = parseGuestsInput(guestsText)?.length ?? 0;
+
+  // Shaped so it can be handed straight to getAvailableLocales — the same
+  // completeness rule the guest side and the server already use, not a
+  // reimplementation of it.
+  const localeCompleteness: LocaleCompletenessInput = {
+    names: { husband, wife },
+    location: { city, venue, address },
+    message,
+  };
+
   const submitDisabled = !isFormValid() || submitting;
 
   function isFormValid(): boolean {
     const dateValid = ddmmyyyy.trim().length > 0 && time.trim().length > 0;
     const coordsValid = isCoordinate(lat) && isCoordinate(lon);
+    const hasCompleteLocale = getAvailableLocales(localeCompleteness).length > 0;
 
-    return dateValid && coordsValid && isSlugValid(mode, slug);
+    return dateValid && coordsValid && isSlugValid(mode, slug) && hasCompleteLocale;
   }
 
   // Every identifying field rewrites the derived slug, so a "taken" verdict
@@ -178,6 +194,12 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
       <section className="flex flex-col gap-4">
+        <LocaleToggle
+          activeLocale={activeLocale}
+          onActiveLocaleChange={setActiveLocale}
+          completeness={localeCompleteness}
+        />
+
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="template">Template</Label>
           <Select value={template} onValueChange={handleTemplateChange}>
@@ -210,8 +232,18 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <LocalizedInput label="Husband name" value={husband} onChange={setHusband} />
-        <LocalizedInput label="Wife name" value={wife} onChange={setWife} />
+        <LocalizedInput
+          label="Husband name"
+          value={husband}
+          onChange={setHusband}
+          activeLocale={activeLocale}
+        />
+        <LocalizedInput
+          label="Wife name"
+          value={wife}
+          onChange={setWife}
+          activeLocale={activeLocale}
+        />
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
@@ -236,9 +268,19 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       </section>
 
       <section className="flex flex-col gap-4">
-        <LocalizedInput label="City" value={city} onChange={setCity} />
-        <LocalizedInput label="Venue" value={venue} onChange={setVenue} />
-        <LocalizedInput label="Address" value={address} onChange={setAddress} />
+        <LocalizedInput label="City" value={city} onChange={setCity} activeLocale={activeLocale} />
+        <LocalizedInput
+          label="Venue"
+          value={venue}
+          onChange={setVenue}
+          activeLocale={activeLocale}
+        />
+        <LocalizedInput
+          label="Address"
+          value={address}
+          onChange={setAddress}
+          activeLocale={activeLocale}
+        />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
@@ -265,7 +307,13 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
       </section>
 
       <section>
-        <LocalizedInput label="Message" value={message} onChange={setMessage} variant="textarea" />
+        <LocalizedInput
+          label="Message"
+          value={message}
+          onChange={setMessage}
+          activeLocale={activeLocale}
+          variant="textarea"
+        />
       </section>
 
       <section className="flex flex-col gap-1.5">

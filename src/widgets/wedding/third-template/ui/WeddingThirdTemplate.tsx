@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 
-import { pick, type WeddingTemplateProps } from "@/entities/wedding";
+import { pick } from "@/entities/wedding/lib/localization";
+import type { WeddingTemplateProps } from "@/entities/wedding/model";
 
 import { formatWeddingDate, getDictionary } from "@/shared/i18n";
 import { MEDIA_LINKS } from "@/shared/lib/mediaLinks";
@@ -10,10 +13,14 @@ import { RevealObserver } from "@/shared/ui/RevealObserver";
 import { CountdownTimer } from "@/shared/ui/CountdownTimer";
 import { MusicButton } from "@/shared/ui/MusicButton/MusicButton";
 
+import { useLocale } from "@/widgets/wedding/ui/LocaleProvider";
+import { LanguagePicker } from "@/widgets/wedding/ui/LanguagePicker";
+
 import { PhotoSlot } from "./PhotoSlot";
 
 export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Element {
-  const { guestName, locale, ...wedding } = props;
+  const { guestName, ...wedding } = props;
+  const { locale } = useLocale();
   const dict = getDictionary(locale);
   const husbandName = pick(wedding.names.husband, locale);
   const wifeName = pick(wedding.names.wife, locale);
@@ -300,6 +307,7 @@ export function WeddingThirdTemplate(props: WeddingTemplateProps): React.JSX.Ele
       </footer>
 
       {wedding.music && <MusicButton src={wedding.music} />}
+      <LanguagePicker />
     </main>
   );
 }

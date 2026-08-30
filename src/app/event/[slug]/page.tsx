@@ -1,11 +1,10 @@
 import { notFound } from "next/navigation";
 
-import { getWeddingBySlug, hasCompleteLocale } from "@/entities/wedding";
+import { getAvailableLocales, getWeddingBySlug } from "@/entities/wedding";
 
 import { resolveGuestName } from "@/shared/lib/guests";
-import { resolveLocale } from "@/shared/i18n";
 
-import { WeddingTemplateSwitch } from "@/widgets/wedding";
+import { LocaleProvider, WeddingTemplateSwitch } from "@/widgets/wedding";
 
 export default async function EventSlugPage({
   params,
@@ -13,7 +12,6 @@ export default async function EventSlugPage({
 }: PageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const lang = firstValue(resolvedSearchParams.lang);
   const guest = firstValue(resolvedSearchParams.guest);
 
   const doc = await getWeddingBySlug(slug);
@@ -22,9 +20,9 @@ export default async function EventSlugPage({
     notFound();
   }
 
-  const locale = resolveLocale(lang);
+  const availableLocales = getAvailableLocales(doc);
 
-  if (!hasCompleteLocale(doc, locale)) {
+  if (availableLocales.length === 0) {
     notFound();
   }
 
@@ -36,7 +34,15 @@ export default async function EventSlugPage({
     }
   }
 
-  return <WeddingTemplateSwitch doc={doc} locale={locale} guestName={guestName} />;
+  return (
+    <LocaleProvider
+      slug={slug}
+      availableLocales={availableLocales}
+      initialLocale={availableLocales[0]}
+    >
+      <WeddingTemplateSwitch doc={doc} guestName={guestName} />
+    </LocaleProvider>
+  );
 }
 
 function firstValue(value: string | string[] | undefined): string | undefined {
@@ -45,5 +51,5 @@ function firstValue(value: string | string[] | undefined): string | undefined {
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ lang?: string | string[]; guest?: string | string[] }>;
+  searchParams: Promise<{ guest?: string | string[] }>;
 }

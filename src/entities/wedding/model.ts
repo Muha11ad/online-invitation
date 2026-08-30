@@ -1,6 +1,6 @@
-import { ObjectId } from "mongodb";
+import type { ObjectId } from "mongodb";
 
-import type { Locale, LocalizedString } from "@/shared/i18n";
+import type { LocalizedString } from "@/shared/i18n";
 import type { TemplateType } from "@/shared/types/templates";
 
 export type { LocalizedString };
@@ -40,7 +40,12 @@ export interface RawWeddingDoc {
   template: TemplateType;
 }
 
-export interface WeddingTemplateProps extends RawWeddingDoc {
-  locale: Locale;
+// `_id` is a Mongo ObjectId class instance and React refuses to serialise it
+// across the server -> client component boundary (same problem solved the
+// same way for the admin form — see WeddingFormValue in
+// src/features/wedding-form/lib/formState.ts). Locale is dropped too: guest
+// language is now a client-side choice via LocaleProvider, not something the
+// server resolves and hands down.
+export interface WeddingTemplateProps extends Omit<RawWeddingDoc, "_id"> {
   guestName?: string;
 }
