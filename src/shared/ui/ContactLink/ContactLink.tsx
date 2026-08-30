@@ -3,7 +3,11 @@ import Image from "next/image";
 import { MEDIA_LINKS } from "@/shared/lib/mediaLinks";
 import { cn } from "@/shared/lib/utils";
 
-const TELEGRAM_URL = process.env.TELEGRAM_URL;
+// NEXT_PUBLIC_ is required, not incidental: this component renders inside the
+// wedding templates, which are client components, so an unprefixed variable is
+// not inlined into the browser bundle and the href hydrates as undefined. The
+// value is public either way — it ships in the rendered HTML.
+const TELEGRAM_URL = process.env.NEXT_PUBLIC_TELEGRAM_URL;
 
 export function ContactLink(params: ContactLinkParams): React.JSX.Element {
   const { className } = params;
