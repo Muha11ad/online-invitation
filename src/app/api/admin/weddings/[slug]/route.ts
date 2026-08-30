@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import {
   deleteWeddingBySlug,
+  getAvailableLocales,
   getWeddingBySlug,
   NULLABLE_WEDDING_FIELDS,
   retireSlug,
@@ -58,6 +59,21 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
   }
 
   const { setFields, unsetFields } = splitPatchValue(validation.value);
+
+  // validateWeddingInput can't judge this: a PATCH may touch only one of
+  // message/names/location and inherit the rest from the stored document, so
+  // the validator would see an incomplete-looking payload that is actually
+  // fine once merged. This is a deliberate deviation from enforcing the rule
+  // in the validator — the same reason slugExists is checked here rather than
+  // there — not an oversight.
+  const mergedForCompleteness = {
+    message: setFields.message ?? existing.message,
+    names: setFields.names ?? existing.names,
+    location: setFields.location ?? existing.location,
+  };
+  if (getAvailableLocales(mergedForCompleteness).length === 0) {
+    return NextResponse.json({ error: "At least one locale must be fully filled in" }, { status: 400 });
+  }
 
   // The slug describes the template, couple and date, so editing any of them
   // regenerates it. The new one is derived here rather than taken from the

@@ -3,6 +3,8 @@ import type { LocalizedString } from "@/shared/i18n";
 import { TemplateType } from "@/shared/types/templates";
 
 import type { RawWeddingDoc } from "../model";
+import { getAvailableLocales } from "./localization";
+import type { LocaleCompletenessInput } from "./localization";
 
 // Fields the admin panel is allowed to create/update, besides `slug` (which
 // is immutable after creation and validated separately by the POST route).
@@ -83,7 +85,26 @@ export function validateWeddingInput(
     }
   }
 
+  // Only meaningful in the non-partial (create) path: message/names/location
+  // are all required there, so `value` is guaranteed to hold every field
+  // getAvailableLocales looks at. A PATCH can touch just one of them and
+  // inherit the rest from the stored document, so this same check there would
+  // reject payloads that are actually fine once merged — see the route.
+  if (!partial && getAvailableLocales(asLocaleCompletenessInput(value)).length === 0) {
+    return { ok: false, error: "At least one locale must be fully filled in" };
+  }
+
   return { ok: true, value };
+}
+
+// Safe only in the non-partial path: message/names/location are required
+// fields there, so they're guaranteed set on `value` by this point.
+function asLocaleCompletenessInput(value: WeddingInputValue): LocaleCompletenessInput {
+  return {
+    message: value.message!,
+    names: value.names!,
+    location: value.location!,
+  };
 }
 
 function validateTemplate(
