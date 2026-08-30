@@ -52,6 +52,7 @@ export function WeddingFirstTemplate(wedding: WeddingTemplateProps): React.JSX.E
             src={MEDIA_LINKS.firstTemplate.wreath}
             alt=""
             fill
+			loading="eager"
             sizes="(min-width: 900px) 420px, 46vw"
             className="object-contain opacity-90"
           />
