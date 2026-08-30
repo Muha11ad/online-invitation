@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { TemplateType } from "../../../shared/types/templates";
 
 import type { RawWeddingDoc } from "../model";
-import { hasCompleteLocale, pick } from "./localization";
+import { getAvailableLocales, hasCompleteLocale, pick } from "./localization";
 
 function buildDoc(overrides: Partial<RawWeddingDoc> = {}): RawWeddingDoc {
   return {
@@ -73,6 +73,27 @@ describe("hasCompleteLocale", () => {
 
     expect(() => hasCompleteLocale(malformedDoc, "en")).not.toThrow();
     expect(hasCompleteLocale(malformedDoc, "en")).toBe(false);
+  });
+});
+
+describe("getAvailableLocales", () => {
+  it("returns every complete locale in LOCALES order", () => {
+    const doc = buildDoc();
+    expect(getAvailableLocales(doc)).toEqual(["en", "ru", "uz", "kiril"]);
+  });
+
+  it("returns an empty array when no locale is complete", () => {
+    const doc = buildDoc({
+      message: { en: "", ru: "", uz: "", kiril: "" },
+    });
+    expect(getAvailableLocales(doc)).toEqual([]);
+  });
+
+  it("returns only the complete subset for a partially-filled doc", () => {
+    const doc = buildDoc({
+      message: { en: "Hello", ru: "", uz: "Salom", kiril: "" },
+    });
+    expect(getAvailableLocales(doc)).toEqual(["en", "uz"]);
   });
 });
 

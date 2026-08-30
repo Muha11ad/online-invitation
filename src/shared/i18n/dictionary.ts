@@ -3,6 +3,7 @@ import type { Locale } from "./locale";
 export interface UiStrings {
   common: {
     dearGuest: string;
+    languagePicker: string;
   };
   countdown: {
     days: string;
@@ -68,6 +69,7 @@ export interface UiStrings {
 const en: UiStrings = {
   common: {
     dearGuest: "Dear {name},",
+    languagePicker: "Change language",
   },
   countdown: {
     days: "Days",
@@ -134,6 +136,7 @@ const en: UiStrings = {
 const ru: UiStrings = {
   common: {
     dearGuest: "Дорогой {name},",
+    languagePicker: "Сменить язык",
   },
   countdown: {
     days: "Дней",
@@ -200,6 +203,7 @@ const ru: UiStrings = {
 const uz: UiStrings = {
   common: {
     dearGuest: "Hurmatli {name},",
+    languagePicker: "Tilni tanlash",
   },
   countdown: {
     days: "Kun",
@@ -266,6 +270,7 @@ const uz: UiStrings = {
 const kiril: UiStrings = {
   common: {
     dearGuest: "Ҳурматли {name},",
+    languagePicker: "Тилни танлаш",
   },
   countdown: {
     days: "Кун",
