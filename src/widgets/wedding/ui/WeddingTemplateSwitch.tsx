@@ -51,7 +51,6 @@ function toWeddingTemplateFields(doc: RawWeddingDoc): Omit<WeddingTemplateProps,
     date: doc.date,
     location: doc.location,
     message: doc.message,
-    guests: doc.guests,
     music: doc.music,
     coupleMainImage: doc.coupleMainImage,
   };

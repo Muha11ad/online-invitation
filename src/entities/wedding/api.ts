@@ -16,7 +16,7 @@ export async function listWeddings(): Promise<WeddingListItem[]> {
   const collection = await getWeddingsCollection();
 
   return collection
-    .find({}, { projection: { slug: 1, template: 1, names: 1, date: 1, guests: 1 } })
+    .find({}, { projection: { slug: 1, template: 1, names: 1, date: 1 } })
     .toArray() as Promise<WeddingListItem[]>;
 }
 
@@ -103,6 +103,4 @@ export interface SlugRename {
   previousSlugs: string[];
 }
 
-export type WeddingListItem = WithId<
-  Pick<RawWeddingDoc, "slug" | "template" | "names" | "date" | "guests">
->;
+export type WeddingListItem = WithId<Pick<RawWeddingDoc, "slug" | "template" | "names" | "date">>;

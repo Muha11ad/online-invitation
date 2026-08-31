@@ -26,7 +26,6 @@ export interface RawWeddingDoc {
   };
   message: LocalizedString;
   music?: string;
-  guests?: string[];
   coupleMainImage?: string;
   slug: string;
   // Slugs this invitation used to be reachable at, kept so links already sent

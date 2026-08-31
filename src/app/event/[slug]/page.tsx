@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { getAvailableLocales, getWeddingBySlug } from "@/entities/wedding";
 
-import { resolveGuestName } from "@/shared/lib/guests";
+import { parseGuestName } from "@/shared/lib/guests";
 
 import { LocaleProvider, WeddingTemplateSwitch } from "@/widgets/wedding";
 
@@ -12,7 +12,7 @@ export default async function EventSlugPage({
 }: PageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const guest = firstValue(resolvedSearchParams.guest);
+  const guestName = parseGuestName(firstValue(resolvedSearchParams.guest));
 
   const doc = await getWeddingBySlug(slug);
 
@@ -24,14 +24,6 @@ export default async function EventSlugPage({
 
   if (availableLocales.length === 0) {
     notFound();
-  }
-
-  let guestName: string | undefined;
-  if (guest !== undefined) {
-    guestName = resolveGuestName(doc.guests, decodeURIComponent(guest));
-    if (guestName === undefined) {
-      notFound();
-    }
   }
 
   return (

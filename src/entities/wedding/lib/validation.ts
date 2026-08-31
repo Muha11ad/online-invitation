@@ -15,14 +15,12 @@ export const WEDDING_MUTABLE_FIELDS = [
   "location",
   "message",
   "music",
-  "guests",
   "coupleMainImage",
 ] as const satisfies ReadonlyArray<keyof RawWeddingDoc>;
 
 // Fields that can be explicitly cleared (sent as `null`) in partial/PATCH
 // mode, which the caller is expected to translate into a MongoDB `$unset`.
 export const NULLABLE_WEDDING_FIELDS = [
-  "guests",
   "music",
   "coupleMainImage",
 ] as const satisfies ReadonlyArray<keyof RawWeddingDoc>;
@@ -36,7 +34,6 @@ export interface WeddingInputValue {
   date?: RawWeddingDoc["date"];
   location?: RawWeddingDoc["location"];
   message?: LocalizedString;
-  guests?: string[] | null;
   music?: string | null;
   coupleMainImage?: string | null;
 }
@@ -73,7 +70,6 @@ export function validateWeddingInput(
     () => validateDate(json, value, partial),
     () => validateLocation(json, value, partial),
     () => validateMessage(json, value, partial),
-    () => validateGuests(json, value, partial),
     () => validateMusic(json, value, partial),
     () => validateCoupleMainImage(json, value, partial),
   ];
@@ -231,28 +227,6 @@ function validateMessage(
   }
 
   value.message = json.message as LocalizedString;
-  return null;
-}
-
-function validateGuests(
-  json: Record<string, unknown>,
-  value: WeddingInputValue,
-  partial: boolean,
-): string | null {
-  if (!("guests" in json)) {
-    return null;
-  }
-
-  const guests = json.guests;
-  if (guests === null) {
-    return validateNullableClear("guests", value, partial);
-  }
-
-  if (!Array.isArray(guests) || guests.some((guest) => typeof guest !== "string")) {
-    return "Invalid guests";
-  }
-
-  value.guests = guests;
   return null;
 }
 

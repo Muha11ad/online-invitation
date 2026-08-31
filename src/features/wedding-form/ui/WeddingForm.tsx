@@ -13,14 +13,12 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
-import { Textarea } from "@/shared/ui/textarea";
 import { TemplateType } from "@/shared/types/templates";
 
 import { ddmmyyyyToInputDate, inputDateToDdmmyyyy } from "../lib/date";
 import { getSlug, isSlugValid, willSlugChange } from "../lib/formSlug";
 import { getInitialFormState } from "../lib/formState";
 import type { WeddingFormMode, WeddingFormValue } from "../lib/formState";
-import { parseGuestsInput } from "../lib/guests";
 import { LocaleToggle } from "./LocaleToggle";
 import { LocalizedInput } from "./LocalizedInput";
 import { MediaUploadSlot } from "./MediaUploadSlot";
@@ -51,7 +49,6 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   const [lat, setLat] = useState(initial.lat);
   const [lon, setLon] = useState(initial.lon);
   const [message, setMessage] = useState<LocalizedString>(initial.message);
-  const [guestsText, setGuestsText] = useState(initial.guestsText);
   const [music, setMusic] = useState(initial.music);
   const [coupleMainImage, setCoupleMainImage] = useState(initial.coupleMainImage);
   const [slugServerError, setSlugServerError] = useState<string | null>(null);
@@ -71,7 +68,6 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
   });
 
   const slugWillChange = willSlugChange(initialValue, slug);
-  const guestsCount = parseGuestsInput(guestsText)?.length ?? 0;
 
   // Shaped so it can be handed straight to getAvailableLocales — the same
   // completeness rule the guest side and the server already use, not a
@@ -120,7 +116,6 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
         coords: { lat: Number(lat), lon: Number(lon) },
       },
       message,
-      guests: parseGuestsInput(guestsText) ?? clearedValue,
       music: music || clearedValue,
       coupleMainImage:
         template === TemplateType.THIRD ? coupleMainImage || clearedValue : undefined,
@@ -314,18 +309,6 @@ export function WeddingForm({ initialValue, mode }: WeddingFormProps): React.JSX
           activeLocale={activeLocale}
           variant="textarea"
         />
-      </section>
-
-      <section className="flex flex-col gap-1.5">
-        <Label htmlFor="guests">Guests</Label>
-        <Textarea
-          id="guests"
-          rows={4}
-          placeholder="Comma-separated guest names"
-          value={guestsText}
-          onChange={(event) => setGuestsText(event.target.value)}
-        />
-        <p className="text-sm text-muted-foreground">{guestsCount} guests</p>
       </section>
 
       <section className="flex flex-col gap-1.5">
