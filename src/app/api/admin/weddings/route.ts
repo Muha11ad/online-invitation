@@ -70,10 +70,7 @@ function buildCreateDoc(params: BuildCreateDocParams): Omit<RawWeddingDoc, "_id"
   };
 
   // Non-partial validation rejects `null` for these, so they can only be
-  // `string[] | string | undefined` at this point.
-  if (value.guests !== undefined) {
-    doc.guests = value.guests as string[];
-  }
+  // `string | undefined` at this point.
   if (value.music !== undefined) {
     doc.music = value.music as string;
   }

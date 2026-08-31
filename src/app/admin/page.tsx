@@ -38,7 +38,6 @@ async function InvitationsList(): Promise<React.JSX.Element> {
     template: wedding.template,
     names: wedding.names,
     date: wedding.date,
-    guests: wedding.guests,
   }));
 
   if (rows.length === 0) {

@@ -1,25 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { resolveGuestName } from "./guests";
+import { parseGuestName } from "./guests";
 
-describe("resolveGuestName", () => {
-  const guests = ["Eleanor", "James"];
-
-  it("matches case-insensitively and returns the stored casing", () => {
-    expect(resolveGuestName(guests, "james")).toBe("James");
-    expect(resolveGuestName(guests, "ELEANOR")).toBe("Eleanor");
+describe("parseGuestName", () => {
+  it("returns the name as written in the link", () => {
+    expect(parseGuestName("Eleanor")).toBe("Eleanor");
   });
 
-  it("trims surrounding whitespace before matching", () => {
-    expect(resolveGuestName(guests, "  Eleanor  ")).toBe("Eleanor");
+  it("keeps the casing it was given, since nothing is matched against a list", () => {
+    expect(parseGuestName("eLeAnOr")).toBe("eLeAnOr");
   });
 
-  it("returns undefined for an unmatched name", () => {
-    expect(resolveGuestName(guests, "Someone Else")).toBeUndefined();
+  it("trims surrounding whitespace", () => {
+    expect(parseGuestName("  Eleanor  ")).toBe("Eleanor");
   });
 
-  it("returns undefined when guests or requested is missing", () => {
-    expect(resolveGuestName(undefined, "Eleanor")).toBeUndefined();
-    expect(resolveGuestName(guests, undefined)).toBeUndefined();
-    expect(resolveGuestName(guests, "   ")).toBeUndefined();
+  it("returns undefined when the parameter is absent or blank", () => {
+    expect(parseGuestName(undefined)).toBeUndefined();
+    expect(parseGuestName("")).toBeUndefined();
+    expect(parseGuestName("   ")).toBeUndefined();
+  });
+
+  it("ignores a name long enough to break the layout", () => {
+    expect(parseGuestName("a".repeat(60))).toBe("a".repeat(60));
+    expect(parseGuestName("a".repeat(61))).toBeUndefined();
+  });
+
+  it("does not choke on a bare percent sign", () => {
+    expect(parseGuestName("100%")).toBe("100%");
   });
 });

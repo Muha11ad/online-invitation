@@ -4,7 +4,6 @@ import { getMediaId } from "@/shared/lib/mediaPrefix";
 
 import { TemplateType } from "@/shared/types/templates";
 
-import { guestsToText } from "./guests";
 import { emptyLocalizedString } from "./localizedString";
 
 export type WeddingFormMode = "create" | "edit";
@@ -27,7 +26,6 @@ export function toWeddingFormValue(doc: RawWeddingDoc): WeddingFormValue {
     date: doc.date,
     location: doc.location,
     message: doc.message,
-    guests: doc.guests,
     music: doc.music,
     coupleMainImage: doc.coupleMainImage,
   };
@@ -45,7 +43,6 @@ export interface WeddingFormInitialState {
   lat: string;
   lon: string;
   message: LocalizedString;
-  guestsText: string;
   music: string | undefined;
   coupleMainImage: string | undefined;
   slug: string;
@@ -74,7 +71,6 @@ export function getInitialFormState(
     lat: String(storedValue.location.coords.lat),
     lon: String(storedValue.location.coords.lon),
     message: storedValue.message,
-    guestsText: guestsToText(storedValue.guests),
     music: storedValue.music,
     coupleMainImage: storedValue.coupleMainImage,
     slug: storedValue.slug,
@@ -95,7 +91,6 @@ function getBlankFormState(): WeddingFormInitialState {
     lat: "",
     lon: "",
     message: emptyLocalizedString(),
-    guestsText: "",
     music: undefined,
     coupleMainImage: undefined,
     slug: "",

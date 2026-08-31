@@ -28,7 +28,6 @@ export function EventsTable({ weddings }: EventsTableProps): React.JSX.Element {
           <TableHead>Date</TableHead>
           <TableHead>Template</TableHead>
           <TableHead>Slug</TableHead>
-          <TableHead>Guests</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -44,8 +43,7 @@ export function EventsTable({ weddings }: EventsTableProps): React.JSX.Element {
 function EventsTableRow({ wedding, onDeleted }: EventsTableRowProps): React.JSX.Element {
   const husbandName = resolveDisplayName(wedding.names.husband);
   const wifeName = resolveDisplayName(wedding.names.wife);
-  const guestsCount = wedding.guests?.length;
-  const viewHref = buildViewHref(wedding.slug, wedding.guests);
+  const viewHref = `/event/${wedding.slug}`;
 
   return (
     <TableRow>
@@ -55,7 +53,6 @@ function EventsTableRow({ wedding, onDeleted }: EventsTableRowProps): React.JSX.
       <TableCell>{formatTableDate(wedding.date.ddmmyyyy)}</TableCell>
       <TableCell className="capitalize">{wedding.template}</TableCell>
       <TableCell className="font-mono">{wedding.slug}</TableCell>
-      <TableCell>{guestsCount ? guestsCount : "—"}</TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
           <Button
@@ -102,14 +99,6 @@ function resolveDisplayName(value: LocalizedString): string {
 
 function formatTableDate(ddmmyyyy: string): string {
   return ddmmyyyy.replaceAll("-", ".");
-}
-
-function buildViewHref(slug: string, guests: string[] | undefined): string {
-  if (!guests || guests.length === 0) {
-    return `/event/${slug}`;
-  }
-
-  return `/event/${slug}?guest=${encodeURIComponent(guests[0])}`;
 }
 
 interface EventsTableProps {
